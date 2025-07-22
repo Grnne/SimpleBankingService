@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using Simple_Account_Service.Infrastructure.InMemory;
 
 namespace Simple_Account_Service;
 
@@ -14,8 +15,11 @@ public class Program
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Simple Account Service API", Version = "v1" });
-                // Мб добавить xml потом
+            // Мб добавить xml потом
         });
+
+        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        builder.Services.AddSingleton<FakeDb>();
 
         var app = builder.Build();
 
