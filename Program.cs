@@ -1,4 +1,6 @@
-﻿namespace Simple_Account_Service;
+﻿using Microsoft.OpenApi.Models;
+
+namespace Simple_Account_Service;
 
 public class Program
 {
@@ -8,7 +10,24 @@ public class Program
 
         builder.Services.AddControllers();
 
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Simple Account Service API", Version = "v1" });
+                // Мб добавить xml потом
+        });
+
         var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Simple Account Service API V1");
+                c.RoutePrefix = string.Empty;
+            });
+        }
 
         app.UseHttpsRedirection();
 
