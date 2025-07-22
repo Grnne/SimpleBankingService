@@ -1,5 +1,5 @@
-﻿namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
+﻿using MediatR;
 
-public class GetAccountStatement
-{
-}
+namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
+
+public record GetAccountStatement(Guid Id) : IRequest<Account>;
