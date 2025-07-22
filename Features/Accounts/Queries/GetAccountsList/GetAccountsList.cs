@@ -1,7 +1,5 @@
-﻿namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
+﻿using MediatR;
 
-public class GetAccountsList
-{
+namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
 
-
-}
+public record GetAccountsList : IRequest<IEnumerable<Account>>;

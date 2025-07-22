@@ -1,5 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Simple_Account_Service.Features.Accounts.Commands.AddAccount;
+using Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
+using Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
 
 namespace Simple_Account_Service.Features.Accounts
 {
@@ -10,9 +13,11 @@ namespace Simple_Account_Service.Features.Accounts
         private readonly IMediator _mediator = mediator;
 
         [HttpPost]
-        public IActionResult CreateAccount([FromBody] Account account)
+        public async Task<ActionResult> CreateAccount([FromBody] Account account)
         {
-            return Ok();
+            await _mediator.Send(new AddAccount(account));
+
+            return StatusCode(201);
         }
 
         [HttpPut("{id:guid}")]
@@ -28,14 +33,18 @@ namespace Simple_Account_Service.Features.Accounts
         }
 
         [HttpGet]
-        public IActionResult GetAccounts()
+        public async Task<IActionResult> GetAccounts()
         {
-            return Ok();
+            var response = await _mediator.Send(new GetAccountsList());
+
+            return Ok(response);
         }
 
         [HttpGet("{id:guid}")]
-        public IActionResult GetAccountById(Guid id)
+        public async Task<IActionResult> GetAccountById(Guid id)
         {
+            var response = await _mediator.Send(new GetAccountStatement(id));
+
             return Ok();
         }
 

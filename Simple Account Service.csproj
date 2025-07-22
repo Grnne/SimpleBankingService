@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Accounts\Handlers\" />
+    <Folder Include="Application\Behaviors\" />
   </ItemGroup>
 
 </Project>

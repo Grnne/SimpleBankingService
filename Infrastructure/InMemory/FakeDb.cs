@@ -20,8 +20,34 @@ public class FakeDb
                 InterestRate = null,
                 CreatedAt = DateTime.UtcNow.AddMonths(-6),
                 ClosedAt = null,
-                Transactions = []
+                Transactions =
+                [
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        AccountId = Guid.NewGuid(),
+                        CounterpartyAccountId = null,
+                        Amount = 200.00m,
+                        Currency = "USD",
+                        Type = TransactionType.Credit,
+                        Description = "Initial deposit",
+                        Timestamp = DateTime.UtcNow.AddMonths(-5)
+                    },
+
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        AccountId = Guid.NewGuid(),
+                        CounterpartyAccountId = null,
+                        Amount = 50.00m,
+                        Currency = "USD",
+                        Type = TransactionType.Debit,
+                        Description = "Grocery shopping",
+                        Timestamp = DateTime.UtcNow.AddMonths(-3)
+                    }
+                ]
             },
+
 
             new Account
             {
@@ -33,8 +59,22 @@ public class FakeDb
                 InterestRate = 0.03m,
                 CreatedAt = DateTime.UtcNow.AddYears(-1),
                 ClosedAt = null,
-                Transactions = []
+                Transactions =
+                [
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        AccountId = Guid.NewGuid(),
+                        CounterpartyAccountId = null,
+                        Amount = 1000m,
+                        Currency = "EUR",
+                        Type = TransactionType.Credit,
+                        Description = "Deposit top-up",
+                        Timestamp = DateTime.UtcNow.AddMonths(-11)
+                    }
+                ]
             },
+
 
             new Account
             {
@@ -46,12 +86,33 @@ public class FakeDb
                 InterestRate = 0.07m,
                 CreatedAt = DateTime.UtcNow.AddMonths(-3),
                 ClosedAt = null,
-                Transactions = []
+                Transactions =
+                [
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        AccountId = Guid.NewGuid(),
+                        CounterpartyAccountId = null,
+                        Amount = 500m,
+                        Currency = "GBP",
+                        Type = TransactionType.Debit,
+                        Description = "Credit card purchase",
+                        Timestamp = DateTime.UtcNow.AddMonths(-2)
+                    }
+                ]
             }
         ];
+
+        foreach (var account in _accounts)
+        {
+            foreach (var txn in account.Transactions)
+            {
+                txn.AccountId = account.Id;
+            }
+        }
     }
 
-    public async Task AddProduct(Account account)
+    public async Task AddAccount(Account account)
     {
         _accounts.Add(account);
         await Task.CompletedTask;
