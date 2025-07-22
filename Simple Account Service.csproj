@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Folder Include="Features\Accounts\DeleteAccount\" />
+    <Folder Include="Features\Accounts\UpdateAccount\" />
+    <Folder Include="Features\Accounts\AddAccount\" />
   </ItemGroup>
 
 </Project>
