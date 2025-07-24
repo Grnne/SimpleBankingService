@@ -1,8 +1,7 @@
 ﻿using MediatR;
-using Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
 using Simple_Account_Service.Infrastructure.InMemory;
 
-namespace Simple_Account_Service.Features.Accounts.Handlers;
+namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
 
 public class GetAccountsListHandler(FakeDb db) : IRequestHandler<GetAccountsList, IEnumerable<Account>>
 {

@@ -1,8 +1,7 @@
 ﻿using MediatR;
-using Simple_Account_Service.Features.Accounts.Commands.AddAccount;
 using Simple_Account_Service.Infrastructure.InMemory;
 
-namespace Simple_Account_Service.Features.Accounts.Handlers;
+namespace Simple_Account_Service.Features.Accounts.Commands.AddAccount;
 
 public class AddAccountHandler : IRequestHandler<AddAccount>
 {
