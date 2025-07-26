@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Simple_Account_Service.Features.Accounts.Commands.AddAccount;
+using Simple_Account_Service.Features.Accounts.Entitites;
 using Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
 using Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
+using Simple_Account_Service.Features.Transactions.Entitites;
 
 namespace Simple_Account_Service.Features.Accounts
 {

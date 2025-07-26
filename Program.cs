@@ -1,5 +1,9 @@
-﻿using Microsoft.OpenApi.Models;
-using Simple_Account_Service.Infrastructure.InMemory;
+﻿using FluentValidation;
+using Microsoft.OpenApi.Models;
+using Simple_Account_Service.Application.Behaviors;
+using Simple_Account_Service.Infrastructure.FakeDb;
+using Simple_Account_Service.Infrastructure.Middleware;
+using System.Reflection;
 
 namespace Simple_Account_Service;
 
@@ -10,6 +14,20 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
+        builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.Services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
+
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+        builder.Services.AddProblemDetails();
+
+        builder.Services.AddAutoMapper(typeof(Program));
+
+        builder.Services.AddSingleton<FakeDb>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
@@ -17,9 +35,6 @@ public class Program
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Simple Account Service API", Version = "v1" });
             // Мб добавить xml потом
         });
-
-        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-        builder.Services.AddSingleton<FakeDb>();
 
         var app = builder.Build();
 

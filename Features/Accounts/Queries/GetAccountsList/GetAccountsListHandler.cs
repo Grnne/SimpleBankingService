@@ -1,5 +1,6 @@
 ﻿using MediatR;
-using Simple_Account_Service.Infrastructure.InMemory;
+using Simple_Account_Service.Features.Accounts.Entitites;
+using Simple_Account_Service.Infrastructure.FakeDb;
 
 namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
 

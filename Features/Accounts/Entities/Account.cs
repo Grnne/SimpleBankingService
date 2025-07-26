@@ -1,4 +1,6 @@
-﻿namespace Simple_Account_Service.Features.Accounts;
+﻿using Simple_Account_Service.Features.Transactions.Entitites;
+
+namespace Simple_Account_Service.Features.Accounts.Entitites;
 
 public class Account
 {
