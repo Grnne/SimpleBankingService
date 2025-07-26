@@ -1,12 +1,16 @@
 ﻿using FluentValidation;
 using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
-using Simple_Account_Service.Infrastructure.FakeDb;
+using Simple_Account_Service.Application.ForFakesAndDummies;
+using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
+using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
+using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Middleware;
+using Simple_Account_Service.Infrastructure.Repositories;
 using System.Reflection;
 
 namespace Simple_Account_Service;
-
+//TODO начиная с кваерис
 public class Program
 {
     public static void Main(string[] args)
@@ -28,6 +32,11 @@ public class Program
         builder.Services.AddAutoMapper(typeof(Program));
 
         builder.Services.AddSingleton<FakeDb>();
+
+        builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+        builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+        builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+        builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>

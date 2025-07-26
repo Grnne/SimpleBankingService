@@ -1,77 +1,54 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Simple_Account_Service.Features.Accounts.Commands.AddAccount;
-using Simple_Account_Service.Features.Accounts.Entitites;
-using Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
-using Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
-using Simple_Account_Service.Features.Transactions.Entitites;
+using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 
-namespace Simple_Account_Service.Features.Accounts
+namespace Simple_Account_Service.Features.Accounts;
+
+[ApiController]
+[Route("api/[controller]/[action]")]
+public class AccountsController(IMediator mediator) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]/[action]")]
-    public class AccountsController(IMediator mediator) : ControllerBase
+    private readonly IMediator _mediator = mediator;
+
+    [HttpPost]
+    public IActionResult CreateAccount([FromBody] CreateAccountDto createAccountDto)
     {
-        private readonly IMediator _mediator = mediator;
+        return Ok();
+    }
 
-        [HttpPost]
-        public async Task<ActionResult> CreateAccount([FromBody] Account account)
-        {
-            await _mediator.Send(new AddAccount(account));
+    [HttpPut("{id:guid}")]
+    public IActionResult UpdateAccount(Guid id, [FromBody] AccountDto updatedAccountDto)
+    {
+        return Ok();
+    }
 
-            return StatusCode(201);
-        }
+    [HttpDelete("{id:guid}")]
+    public IActionResult DeleteAccount(Guid id)
+    {
+        return Ok();
+    }
 
-        [HttpPut("{id:guid}")]
-        public IActionResult UpdateAccount(Guid id, [FromBody] Account updatedAccount)
-        {
-            return Ok();
-        }
+    [HttpGet]
+    public IActionResult GetAccounts()
+    {
+        return Ok();
+    }
 
-        [HttpDelete("{id:guid}")]
-        public IActionResult DeleteAccount(Guid id)
-        {
-            return Ok();
-        }
+    [HttpGet("{id:guid}")]
+    public IActionResult GetAccountById(Guid id)
+    {
+        return Ok();
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAccounts()
-        {
-            var response = await _mediator.Send(new GetAccountsList());
+    [HttpGet("{ownerId:guid}")]
+    public IActionResult GetStatement(Guid ownerId)
+    {
+        return Ok();
+    }
 
-            return Ok(response);
-        }
-
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetAccountById(Guid id)
-        {
-            var response = await _mediator.Send(new GetAccountStatement(id));
-
-            return Ok();
-        }
-
-        [HttpPost("{accountId:guid}")]
-        public IActionResult RegisterTransaction(Guid accountId, [FromBody] Transaction transaction)
-        {
-            return Ok();
-        }
-
-        [HttpPost("transfer")]
-        public IActionResult Transfer([FromBody] string request)
-        {
-            return Ok();
-        }
-
-        [HttpGet("{ownerId:guid}")]
-        public IActionResult GetStatement(Guid ownerId)
-        {
-            return Ok();
-        }
-
-        [HttpGet]
-        public IActionResult AccountExists([FromQuery] Guid ownerId)
-        {
-            return Ok();
-        }
+    [HttpGet]
+    public IActionResult AccountExists([FromQuery] Guid ownerId)
+    {
+        return Ok();
     }
 }

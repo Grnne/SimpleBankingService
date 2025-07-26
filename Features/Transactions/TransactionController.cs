@@ -1,23 +1,24 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Simple_Account_Service.Features.Transactions.Entitites;
+using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
+using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
 namespace Simple_Account_Service.Features.Transactions;
 
 [ApiController]
-[Route("api/[controller]/[action]")]
+[Route("api/[controller]/[action]/{accountId:guid}")]
 public class TransactionController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    [HttpPost("{accountId:guid}")]
-    public IActionResult RegisterTransaction(Guid accountId, [FromBody] Transaction transaction)
+    [HttpPost("")]
+    public IActionResult CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
         return Ok();
     }
 
-    [HttpPost("transfer")]
-    public IActionResult Transfer([FromBody] string request)
+    [HttpPost("")]
+    public IActionResult TransferBetweenAccounts(Guid accountId, [FromBody] TransferBetweenAccountsDto createTransactionDto)
     {
         return Ok();
     }
