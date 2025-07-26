@@ -3,33 +3,26 @@ using Simple_Account_Service.Infrastructure.Data;
 
 namespace Simple_Account_Service.Infrastructure.Repositories;
 
-public class OwnerRepository : IOwnerRepository
+public class OwnerRepository(FakeDb db) : IOwnerRepository
 {
-    private readonly FakeDb _db;
-
-    public OwnerRepository(FakeDb db)
+    public async Task<Owner?> GetByIdAsync(Guid accountId)
     {
-        _db = db;
+        return await db.GetOwnerByIdAsync(accountId);
     }
 
-    public async Task<Owner?> GetByIdAsync(Guid id)
+    public async Task<Owner> CreateAsync(Owner entity)
     {
-        return await _db.GetOwnerByIdAsync(id);
-    }
-
-    public async Task<Owner> AddAsync(Owner entity)
-    {
-        return await _db.AddOwnerAsync(entity);
+        return await db.AddOwnerAsync(entity);
     }
 
     public async Task<Owner> UpdateAsync(Owner entity)
     {
-        await _db.UpdateOwnerAsync(entity);
+        await db.UpdateOwnerAsync(entity);
         return entity;
     }
 
-    public async Task RemoveAsync(Guid id)
+    public async Task DeleteAsync(Guid accountId)
     {
-        await _db.RemoveOwnerAsync(id);
+        await db.RemoveOwnerAsync(accountId);
     }
 }

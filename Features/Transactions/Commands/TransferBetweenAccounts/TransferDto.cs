@@ -1,6 +1,6 @@
 ﻿namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
-public class TransferBetweenAccountsDto
+public class TransferDto
 {
     public Guid DestinationAccountId { get; set; }
 

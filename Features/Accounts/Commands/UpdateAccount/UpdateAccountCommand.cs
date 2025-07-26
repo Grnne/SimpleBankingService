@@ -1,5 +1,5 @@
-﻿namespace Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
+﻿using MediatR;
 
-public class UpdateAccount
-{
-}
+namespace Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
+
+public record UpdateAccountCommand(Guid AccountId, UpdateAccountDto Request) : IRequest<AccountDto>;

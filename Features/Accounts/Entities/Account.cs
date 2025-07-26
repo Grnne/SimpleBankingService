@@ -1,6 +1,6 @@
-﻿using Simple_Account_Service.Features.Transactions.Entitites;
+﻿using Simple_Account_Service.Features.Transactions.Entities;
 
-namespace Simple_Account_Service.Features.Accounts.Entitites;
+namespace Simple_Account_Service.Features.Accounts.Entities;
 
 public class Account
 {
@@ -8,7 +8,7 @@ public class Account
 
     public Guid OwnerId { get; set; }
 
-    public AccountType Тип { get; set; }
+    public AccountType Type { get; set; }
 
     public string Currency { get; set; } = null!;
 

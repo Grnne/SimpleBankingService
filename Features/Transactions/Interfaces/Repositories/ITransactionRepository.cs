@@ -1,5 +1,5 @@
 ﻿using Simple_Account_Service.Application.Interfaces;
-using Simple_Account_Service.Features.Transactions.Entitites;
+using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 

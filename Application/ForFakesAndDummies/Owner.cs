@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Simple_Account_Service.Application.ForDevelopment;
+namespace Simple_Account_Service.Application.ForFakesAndDummies;
 
 public class Owner
 {

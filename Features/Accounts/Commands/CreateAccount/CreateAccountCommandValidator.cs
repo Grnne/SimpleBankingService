@@ -3,9 +3,9 @@ using Simple_Account_Service.Features.Accounts.Entities;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 
-public sealed class CreateAccountValidator : AbstractValidator<CreateAccount>
+public sealed class CreateAccountCommandValidator : AbstractValidator<CreateAccountCommand>
 {
-    public CreateAccountValidator()
+    public CreateAccountCommandValidator()
     {
         RuleFor(x => x.Request.OwnerId)
             .NotEmpty().WithMessage("Идентификатор владельца обязателен.");

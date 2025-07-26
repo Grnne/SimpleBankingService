@@ -1,6 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
+using Simple_Account_Service.Features.Accounts.Commands.DeleteAccount;
+using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
+using Simple_Account_Service.Features.Accounts.Queries.CheckAccountExists;
+using Simple_Account_Service.Features.Accounts.Queries.GetAccounts;
+using Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
 
 namespace Simple_Account_Service.Features.Accounts;
 
@@ -8,47 +13,64 @@ namespace Simple_Account_Service.Features.Accounts;
 [Route("api/[controller]/[action]")]
 public class AccountsController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator = mediator;
-
+    //todo как в тз
     [HttpPost]
-    public IActionResult CreateAccount([FromBody] CreateAccountDto createAccountDto)
+    public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto createAccountDto)
     {
-        return Ok();
+        var response = await mediator.Send(new CreateAccountCommand(createAccountDto));
+
+        return Ok(response);
     }
 
-    [HttpPut("{id:guid}")]
-    public IActionResult UpdateAccount(Guid id, [FromBody] AccountDto updatedAccountDto)
+    [HttpPut("{accountId:guid}")]
+    public async Task<IActionResult> UpdateAccount(Guid accountId, [FromBody] UpdateAccountDto updatedAccountDto)
     {
-        return Ok();
+        var response = await mediator.Send(
+            new UpdateAccountCommand(accountId, updatedAccountDto));
+
+        return Ok(response);
     }
 
-    [HttpDelete("{id:guid}")]
-    public IActionResult DeleteAccount(Guid id)
+    [HttpDelete("{accountId:guid}")]
+    public async Task<IActionResult> DeleteAccount(Guid accountId)
     {
-        return Ok();
+        await mediator.Send(new DeleteAccountCommand(accountId));
+
+        return NoContent();
     }
 
     [HttpGet]
-    public IActionResult GetAccounts()
+    public async Task<IActionResult> GetAccounts()
     {
-        return Ok();
+        var response = await mediator.Send(new GetAllAccountsQuery());
+
+        return Ok(response.ToList());
     }
 
-    [HttpGet("{id:guid}")]
-    public IActionResult GetAccountById(Guid id)
-    {
-        return Ok();
-    }
 
     [HttpGet("{ownerId:guid}")]
-    public IActionResult GetStatement(Guid ownerId)
+    public async Task<IActionResult> GetAccountStatement(Guid ownerId, [FromQuery] Guid? accountId,
+        DateTime startDate, DateTime endDate)
     {
-        return Ok();
+
+        var response = await mediator.Send(
+            new GetAccountStatementQuery(ownerId, accountId, startDate, endDate));
+
+        return Ok(response);
     }
 
-    [HttpGet]
-    public IActionResult AccountExists([FromQuery] Guid ownerId)
+
+    //Посчитал излишним делать queries валидаторы только для пустого гуид, неконсистентно и уродливо, стоит поправить наверное
+    [HttpGet("{accountId:guid}")]
+    public async Task<IActionResult> AccountExists(Guid accountId)
     {
-        return Ok();
+        if (accountId == Guid.Empty)
+        {
+            return BadRequest("Идентификатор владельца не может быть пустым.");
+        }
+
+        var response = await mediator.Send(new CheckAccountExistsQuery(accountId));
+
+        return Ok(response);
     }
 }

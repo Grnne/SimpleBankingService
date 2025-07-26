@@ -1,4 +1,4 @@
-﻿namespace Simple_Account_Service.Features.Transactions.Entitites;
+﻿namespace Simple_Account_Service.Features.Transactions.Entities;
 
 public class Transaction
 {

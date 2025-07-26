@@ -18,7 +18,7 @@ public class TransactionController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("")]
-    public IActionResult TransferBetweenAccounts(Guid accountId, [FromBody] TransferBetweenAccountsDto createTransactionDto)
+    public IActionResult TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto createTransactionDto)
     {
         return Ok();
     }

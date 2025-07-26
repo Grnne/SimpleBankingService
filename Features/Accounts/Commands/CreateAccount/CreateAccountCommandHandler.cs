@@ -1,14 +1,12 @@
 ﻿using MediatR;
-using Simple_Account_Service.Infrastructure.FakeDb;
+namespace Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 
-namespace Simple_Account_Service.Features.Accounts.Commands.AddAccount;
-
-public class AddAccountHandler(FakeDb db) : IRequestHandler<AddAccount>
+public class CreateAccountCommandHandler(AccountsService service) : IRequestHandler<CreateAccountCommand, AccountDto>
 {
-    public async Task Handle(AddAccount request, CancellationToken cancellationToken)
+    public async Task<AccountDto> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
     {
-        await db.AddAccount(request.Account);
+        var response = service.CreateAccountAsync(request.Request);
 
-        return;
+        return await response;
     }
 }

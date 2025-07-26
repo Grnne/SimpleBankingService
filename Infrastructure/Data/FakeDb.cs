@@ -18,6 +18,9 @@ public class FakeDb
 
     #region Account
 
+    public Task<IEnumerable<Account>> GetAllAccountsAsync() =>
+        Task.FromResult<IEnumerable<Account>>(_accounts);
+
     public Task<Account?> GetAccountByIdAsync(Guid id) =>
         Task.FromResult(_accounts.FirstOrDefault(a => a.Id == id));
 
@@ -69,10 +72,7 @@ public class FakeDb
 
         var account = _accounts.FirstOrDefault(a => a.Id == transaction.AccountId);
 
-        if (account != null)
-        {
-            account.Transactions.Add(transaction);
-        }
+        account?.Transactions.Add(transaction);
 
         return Task.FromResult(transaction);
     }
@@ -116,14 +116,11 @@ public class FakeDb
 
         var account = _accounts.FirstOrDefault(a => a.Id == transaction.AccountId);
 
-        if (account != null)
-        {
-            var txnInAccount = account.Transactions.FirstOrDefault(t => t.Id == id);
+        var txnInAccount = account?.Transactions.FirstOrDefault(t => t.Id == id);
 
-            if (txnInAccount != null)
-            {
-                account.Transactions.Remove(txnInAccount);
-            }
+        if (txnInAccount != null)
+        {
+            account?.Transactions.Remove(txnInAccount);
         }
 
         return Task.FromResult(true);
