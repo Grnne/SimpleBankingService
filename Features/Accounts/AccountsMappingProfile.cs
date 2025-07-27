@@ -16,12 +16,23 @@ public class AccountsMappingProfile : Profile
         CreateMap<Account, AccountDto>();
 
         CreateMap<UpdateAccountDto, Account>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.OwnerId, opt => opt.Ignore())
+            .ForMember(dest => dest.Type, opt => opt.Ignore())
+            .ForMember(dest => dest.Currency, opt => opt.Ignore())
+            .ForMember(dest => dest.Balance, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Transactions, opt => opt.Ignore())
             .ForAllMembers(opt => opt.Condition(
                 srcMember => srcMember != null));
 
         CreateMap<CreateAccountDto, Account>()
-            .ForAllMembers(opt => opt.Condition(
-                srcMember => srcMember != null));
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Balance, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.ClosedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Transactions, opt => opt.Ignore())
+            .ForAllMembers(opt => opt.Condition(srcMember => srcMember != null));
 
         CreateMap<Transaction, TransactionForStatementDto>();
     }

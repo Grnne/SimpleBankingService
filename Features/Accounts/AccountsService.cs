@@ -89,7 +89,7 @@ public class AccountsService(IAccountRepository repository, IMapper mapper) : IA
         var accounts = await repository.GetAllAccountsAsync();
         var filteredOwnerAccounts = accounts.Where(a => a.OwnerId == ownerId).ToList();
 
-        if (filteredOwnerAccounts.Count > 0)
+        if (filteredOwnerAccounts.Count == 0)
         {
             throw new NotFoundException($"Счета владельца с id {ownerId} не найдены.");
         }
@@ -125,7 +125,7 @@ public class AccountsService(IAccountRepository repository, IMapper mapper) : IA
 
             var filteredAccounts = FilterAccountsByPeriod([existing], startDate, endDate);
 
-            if (filteredAccounts.Count > 0)
+            if (filteredAccounts.Count == 0)
             {
                 throw new NotFoundException($"В данном периоде не найден счет с {accountId}.");
             }

@@ -7,7 +7,6 @@ namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransactio
 public class CreateTransactionDto
 {
     [UsedImplicitly]
-    public Guid? CounterpartyAccountId { get; set; }
 
     public decimal Amount { get; set; }
 

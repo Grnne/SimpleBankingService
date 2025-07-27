@@ -14,8 +14,11 @@ public class TransactionsMappingProfile : Profile
         CreateMap<Transaction, TransactionDto>();
 
         CreateMap<CreateTransactionDto, Transaction>()
-            .ForAllMembers(opt => opt.Condition(
-                srcMember => srcMember != null));
+            .ForMember(dest => dest.CounterpartyAccountId, opt => opt.Ignore())
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.AccountId, opt => opt.Ignore())
+            .ForMember(dest => dest.Timestamp, opt => opt.Ignore())
+            .ForAllMembers(opt => opt.Condition(srcMember => srcMember != null));
 
         CreateMap<TransferDto, Transaction>()
             .ForMember(dest => dest.CounterpartyAccountId, opt => opt.MapFrom(src => src.DestinationAccountId))

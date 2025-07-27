@@ -11,7 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Simple_Account_Service.Features.Transactions;
 
-public class TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, IMapper mapper) : ITransactionService
+public class TransactionsService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, IMapper mapper) : ITransactionService
 {
     //Пока нет нормальной бд часть бд логики в сервисах.
 
@@ -37,7 +37,7 @@ public class TransactionService(ITransactionRepository transactionRepository, IA
                 account.Balance += createTransactionDto.Amount;
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(accountId));
         }
         await accountRepository.UpdateAsync(account);
 
