@@ -36,6 +36,10 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     ///         "description": "Payment for invoice #123"
     ///     }
     /// </remarks>
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TransactionDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [HttpPost]
     public async Task<IActionResult> CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
@@ -69,6 +73,10 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     ///         "description": "Transfer to savings"
     ///     }
     /// </remarks>
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TransactionDto>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [HttpPost]
     public async Task<IActionResult> TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto transferDto)
     {
