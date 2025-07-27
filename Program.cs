@@ -4,6 +4,7 @@ using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Features.Accounts;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
+using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Middleware;
@@ -40,12 +41,12 @@ public class Program
         builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 
         builder.Services.AddScoped<AccountsService, AccountsService>(); //TODO interfaces
+        builder.Services.AddScoped<TransactionService, TransactionService>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Simple Account Service API", Version = "v1" });
-            // Мб добавить xml потом
         });
 
         var app = builder.Build();

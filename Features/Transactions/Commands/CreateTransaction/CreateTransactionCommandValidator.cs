@@ -12,8 +12,6 @@ namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransactio
             RuleFor(x => x.CreateTransactionDto)
                 .NotNull().WithMessage("Данные транзакции обязательны.");
 
-            // Далее правила для полей DTO (через команду напрямую)
-
             RuleFor(x => x.CreateTransactionDto.Amount)
                 .GreaterThan(0).WithMessage("Сумма транзакции должна быть больше 0.");
 
@@ -24,11 +22,9 @@ namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransactio
             RuleFor(x => x.CreateTransactionDto.Type)
                 .IsInEnum().WithMessage("Недопустимый тип транзакции.");
 
-            // CounterpartyAccountId может быть null, если требуется — здесь можно добавить правила
-
             RuleFor(x => x.CreateTransactionDto.Description)
                 .MaximumLength(250).WithMessage("Описание транзакции не может превышать 250 символов.")
-                .When(x => !string.IsNullOrEmpty(x.CreateTransactionDto.Description)); // описывать проверку, если поле указано
+                .When(x => !string.IsNullOrEmpty(x.CreateTransactionDto.Description));
         }
     }
 }

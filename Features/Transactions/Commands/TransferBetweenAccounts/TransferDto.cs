@@ -1,4 +1,6 @@
-﻿namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
+﻿using Simple_Account_Service.Features.Transactions.Entities;
+
+namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
 public class TransferDto
 {
@@ -7,6 +9,8 @@ public class TransferDto
     public decimal Amount { get; set; }
 
     public string Currency { get; set; } = null!;
+
+    public TransactionType Type { get; set; }
 
     public string? Description { get; set; }
 }

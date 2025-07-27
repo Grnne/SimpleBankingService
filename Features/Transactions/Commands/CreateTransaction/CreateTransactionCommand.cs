@@ -1,3 +1,5 @@
-﻿namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
+﻿using MediatR;
 
-public record CreateTransactionCommand(Guid AccountId, CreateTransactionDto CreateTransactionDto);
+namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
+
+public record CreateTransactionCommand(Guid AccountId, CreateTransactionDto CreateTransactionDto) : IRequest<TransactionDto>;

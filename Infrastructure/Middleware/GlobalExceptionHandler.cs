@@ -13,8 +13,6 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             Instance = httpContext.Request.Path
         };
 
-        //TODO  409 Conflict. errors
-
         if (exception is FluentValidation.ValidationException fluentException)
         {
             problemDetails.Title = "One or more validation errors occurred.";
@@ -27,6 +25,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         {
             problemDetails.Title = exception.Message;
             httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+        }
+        else if (exception is ConflictException)
+        {
+            problemDetails.Title = exception.Message;
+            httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
         }
         else
         {

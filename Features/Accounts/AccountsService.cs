@@ -35,11 +35,16 @@ public class AccountsService(IAccountRepository repository, IMapper mapper)
             throw new NotFoundException($"Счет {accountId} не найден.");
         }
 
+        if (account.ClosedAt != null)
+        {
+            throw new ConflictException("Нельзя изменить или удалить уже закрытый счет.");
+        }
+
         if (request.ClosedAt != null)
         {
             if (request.ClosedAt < account.CreatedAt)
             {
-                throw new ValidationException("Дата закрытия счета должна быть после даты открытия");
+                throw new ConflictException("Дата закрытия счета должна быть после даты открытия");
             }
 
             account.ClosedAt = request.ClosedAt;
@@ -73,13 +78,13 @@ public class AccountsService(IAccountRepository repository, IMapper mapper)
         return mapper.Map<IEnumerable<AccountDto>>(accounts);
     }
 
+    // Фильтрация здесь, пока нет нормальной базы данных
+    // Алгоритм поиска остатка на начало выписки здесь, т.к. по тз сущности не позволяют сделать адекватно
+    // В любом случае тут должен быть рефактор на балансы, и разодрать всё на методы
+
     public async Task<MultiAccountStatementDto> GetAccountStatement(Guid ownerId, Guid? accountId,
         DateTime startDate, DateTime endDate)
     {
-        // Фильтрация здесь, пока нет нормальной базы данных
-        // Алгоритм поиска остатка на начало выписки здесь, т.к. по тз сущности не позволяют сделать адекватно
-        // В любом случае тут должен быть рефактор на балансы, и разодрать всё на методы
-
         var accounts = await repository.GetAllAccountsAsync();
         var filteredOwnerAccounts = accounts.Where(a => a.OwnerId == ownerId).ToList();
 

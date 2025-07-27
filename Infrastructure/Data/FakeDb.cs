@@ -259,14 +259,27 @@ public class FakeDb
             OwnerId = _users[1].Id,
             Type = AccountType.Credit,
             Currency = "RUB",
-            Balance = -2000.00m,
+            Balance = 2000.00m,
             InterestRate = 0.07m,
             CreatedAt = DateTime.UtcNow.AddMonths(-2),
             ClosedAt = null,
             Transactions = []
         };
 
-        _accounts.AddRange([account1, account2, account3]);
+        var account4 = new Account
+        {
+            Id = Guid.NewGuid(),
+            OwnerId = _users[1].Id,
+            Type = AccountType.Credit,
+            Currency = "RUB",
+            Balance = -2000.00m,
+            InterestRate = 0.07m,
+            CreatedAt = DateTime.UtcNow.AddMonths(-1),
+            ClosedAt = null,
+            Transactions = []
+        };
+
+        _accounts.AddRange([account1, account2, account3, account4]);
 
         var txn1 = new Transaction
         {

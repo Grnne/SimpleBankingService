@@ -12,14 +12,20 @@ public class TransactionController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     [HttpPost("")]
-    public IActionResult CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
+    public async Task<IActionResult> CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
-        return Ok();
+        var response = await _mediator.Send(
+            new CreateTransactionCommand(accountId, createTransactionDto));
+
+        return Ok(response);
     }
 
     [HttpPost("")]
-    public IActionResult TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto createTransactionDto)
+    public async Task<IActionResult> TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto transferDto)
     {
-        return Ok();
+        var response = await _mediator.Send(
+            new TransferBetweenAccountsCommand(accountId, transferDto));
+
+        return Ok(response);
     }
 }
