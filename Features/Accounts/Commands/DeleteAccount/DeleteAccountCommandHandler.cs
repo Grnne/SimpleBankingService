@@ -1,8 +1,11 @@
-﻿using MediatR;
+﻿using JetBrains.Annotations;
+using MediatR;
+using Simple_Account_Service.Features.Accounts.Interfaces;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.DeleteAccount;
 
-public class DeleteAccountCommandHandler(AccountsService service) : IRequestHandler<DeleteAccountCommand>
+[UsedImplicitly]
+public class DeleteAccountCommandHandler(IAccountsService service) : IRequestHandler<DeleteAccountCommand>
 {
     public async Task Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {

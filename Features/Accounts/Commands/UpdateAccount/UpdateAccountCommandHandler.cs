@@ -1,8 +1,11 @@
-﻿using MediatR;
+﻿using JetBrains.Annotations;
+using MediatR;
+using Simple_Account_Service.Features.Accounts.Interfaces;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
 
-public class UpdateAccountCommandHandler(AccountsService service) : IRequestHandler<UpdateAccountCommand, AccountDto>
+[UsedImplicitly]
+public class UpdateAccountCommandHandler(IAccountsService service) : IRequestHandler<UpdateAccountCommand, AccountDto>
 {
     public async Task<AccountDto> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
     {

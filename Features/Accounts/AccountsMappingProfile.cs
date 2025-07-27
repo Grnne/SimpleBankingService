@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JetBrains.Annotations;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
 using Simple_Account_Service.Features.Accounts.Entities;
@@ -7,6 +8,7 @@ using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service.Features.Accounts;
 
+[UsedImplicitly]
 public class AccountsMappingProfile : Profile
 {
     public AccountsMappingProfile()
@@ -15,11 +17,11 @@ public class AccountsMappingProfile : Profile
 
         CreateMap<UpdateAccountDto, Account>()
             .ForAllMembers(opt => opt.Condition(
-                (src, dest, srcMember) => srcMember != null));
+                srcMember => srcMember != null));
 
         CreateMap<CreateAccountDto, Account>()
             .ForAllMembers(opt => opt.Condition(
-                (src, dest, srcMember) => srcMember != null));
+                srcMember => srcMember != null));
 
         CreateMap<Transaction, TransactionForStatementDto>();
     }

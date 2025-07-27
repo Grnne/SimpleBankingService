@@ -4,13 +4,14 @@ using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
 using Simple_Account_Service.Features.Accounts.Entities;
+using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement.Dto;
 using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service.Features.Accounts;
 
-public class AccountsService(IAccountRepository repository, IMapper mapper)
+public class AccountsService(IAccountRepository repository, IMapper mapper) : IAccountsService
 {
     public async Task<AccountDto> CreateAccountAsync(CreateAccountDto createAccountDto)
     {
@@ -88,7 +89,7 @@ public class AccountsService(IAccountRepository repository, IMapper mapper)
         var accounts = await repository.GetAllAccountsAsync();
         var filteredOwnerAccounts = accounts.Where(a => a.OwnerId == ownerId).ToList();
 
-        if (!filteredOwnerAccounts.Any())
+        if (filteredOwnerAccounts.Count > 0)
         {
             throw new NotFoundException($"Счета владельца с id {ownerId} не найдены.");
         }
@@ -124,7 +125,7 @@ public class AccountsService(IAccountRepository repository, IMapper mapper)
 
             var filteredAccounts = FilterAccountsByPeriod([existing], startDate, endDate);
 
-            if (!filteredAccounts.Any())
+            if (filteredAccounts.Count > 0)
             {
                 throw new NotFoundException($"В данном периоде не найден счет с {accountId}.");
             }
@@ -135,7 +136,7 @@ public class AccountsService(IAccountRepository repository, IMapper mapper)
         {
             filteredOwnerAccounts = FilterAccountsByPeriod(filteredOwnerAccounts, startDate, endDate);
 
-            if (!filteredOwnerAccounts.Any())
+            if (filteredOwnerAccounts.Count > 0)
             {
                 throw new NotFoundException($"Счета владельца с id {ownerId} не найдены в заданном периоде.");
             }
@@ -184,8 +185,10 @@ public class AccountsService(IAccountRepository repository, IMapper mapper)
     // Хотел разбить по дяде Бобу все на методы поменьше, но т.к. все равно надо переделывать целиком, оставил так
     private static List<Account> FilterAccountsByPeriod(List<Account> accounts, DateTime startDate, DateTime endDate)
     {
-        return accounts
-            .Where(a => a.CreatedAt <= endDate && (a.ClosedAt == null || a.ClosedAt >= startDate))
-            .ToList();
+        var result = accounts
+            .Where(a => a.CreatedAt <= endDate && (a.ClosedAt == null || a.ClosedAt >= startDate)).ToList();
+
+        return result;
+
     }
 }

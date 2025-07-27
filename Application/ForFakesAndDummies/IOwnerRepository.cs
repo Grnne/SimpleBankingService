@@ -2,7 +2,4 @@
 
 namespace Simple_Account_Service.Application.ForFakesAndDummies;
 
-public interface IOwnerRepository : IBaseRepository<Owner>
-{
-
-}
+public interface IOwnerRepository : IBaseRepository<Owner>;

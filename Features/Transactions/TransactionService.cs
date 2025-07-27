@@ -5,12 +5,13 @@ using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 using Simple_Account_Service.Features.Transactions.Entities;
+using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Simple_Account_Service.Features.Transactions;
 
-public class TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, IMapper mapper)
+public class TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, IMapper mapper) : ITransactionService
 {
     //Пока нет нормальной бд часть бд логики в сервисах.
 
@@ -27,13 +28,16 @@ public class TransactionService(ITransactionRepository transactionRepository, IA
 
         var result = await transactionRepository.CreateAsync(transaction);
 
-        if (createTransactionDto.Type == TransactionType.Debit)
+        switch (createTransactionDto.Type)
         {
-            account.Balance -= createTransactionDto.Amount;
-        }
-        else if (createTransactionDto.Type == TransactionType.Credit)
-        {
-            account.Balance += createTransactionDto.Amount;
+            case TransactionType.Debit:
+                account.Balance -= createTransactionDto.Amount;
+                break;
+            case TransactionType.Credit:
+                account.Balance += createTransactionDto.Amount;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
         await accountRepository.UpdateAsync(account);
 

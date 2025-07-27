@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using JetBrains.Annotations;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
 
+[UsedImplicitly]
 public sealed class UpdateAccountCommandValidator : AbstractValidator<UpdateAccountCommand>
 {
     public UpdateAccountCommandValidator()
