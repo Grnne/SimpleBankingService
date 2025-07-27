@@ -41,7 +41,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     ///     }
     /// </remarks>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(AccountDto))] // замените CreateAccountResponseDto на актуальный DTO ответа
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(AccountDto))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto createAccountDto)
@@ -72,7 +72,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     ///     }
     /// </remarks>
     [HttpPatch("{accountId:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AccountDto))] // замените UpdateAccountResponseDto на ваш DTO
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(AccountDto))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -103,7 +103,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// </summary>
     /// <returns>Возвращает список счетов с кодом 200 OK.</returns>
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AccountDto>))] // замените AccountDto на ваш DTO
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<AccountDto>))]
     public async Task<IActionResult> GetAccounts()
     {
         var response = await mediator.Send(new GetAllAccountsQuery());
@@ -125,7 +125,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     ///     GET /api/Accounts/GetAccountStatement/{ownerId}?accountId={accountId}&amp;startDate=2025-01-01&amp;endDate=2025-06-30
     /// </remarks>
     [HttpGet("{ownerId:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MultiAccountStatementDto))] // замените на свой DTO
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MultiAccountStatementDto))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAccountStatement(Guid ownerId, [FromQuery] Guid? accountId,
