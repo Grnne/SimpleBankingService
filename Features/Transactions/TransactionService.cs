@@ -1,0 +1,107 @@
+﻿using AutoMapper;
+using Simple_Account_Service.Application.Exceptions;
+using Simple_Account_Service.Features.Accounts.Entities;
+using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
+using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
+using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
+using Simple_Account_Service.Features.Transactions.Entities;
+using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Simple_Account_Service.Features.Transactions;
+
+public class TransactionService(ITransactionRepository transactionRepository, IAccountRepository accountRepository, IMapper mapper)
+{
+    //Пока нет нормальной бд часть бд логики в сервисах.
+
+    public async Task<TransactionDto> CreateTransactionAsync(Guid accountId, CreateTransactionDto createTransactionDto)
+    {
+        var account = await accountRepository.GetByIdAsync(accountId);
+        CheckAccount(accountId, account, createTransactionDto.Type, createTransactionDto.Amount, createTransactionDto.Currency);
+
+        var transaction = mapper.Map<Transaction>(createTransactionDto);
+
+        transaction.Id = Guid.NewGuid();
+        transaction.AccountId = accountId;
+        transaction.Timestamp = DateTime.UtcNow;
+
+        var result = await transactionRepository.CreateAsync(transaction);
+
+        if (createTransactionDto.Type == TransactionType.Debit)
+        {
+            account.Balance -= createTransactionDto.Amount;
+        }
+        else if (createTransactionDto.Type == TransactionType.Credit)
+        {
+            account.Balance += createTransactionDto.Amount;
+        }
+        await accountRepository.UpdateAsync(account);
+
+        return mapper.Map<TransactionDto>(result);
+    }
+
+    public async Task<List<TransactionDto>> TransferBetweenAccounts(Guid accountId, TransferDto transferDto)
+    {
+        var sourceAccount = await accountRepository.GetByIdAsync(accountId);
+        CheckAccount(accountId, sourceAccount, transferDto.Type, transferDto.Amount, transferDto.Currency);
+
+        var destinationTransactionType = transferDto.Type == TransactionType.Credit
+            ? TransactionType.Debit
+            : TransactionType.Credit;
+
+        var destinationAccount = await accountRepository.GetByIdAsync(transferDto.DestinationAccountId);
+
+        if (destinationAccount == null)
+        {
+            throw new NotFoundException($"Счет с id {transferDto.DestinationAccountId} не найден.");
+        }
+
+        CheckAccount(destinationAccount.Id, destinationAccount, destinationTransactionType, transferDto.Amount, transferDto.Currency);
+
+        var sourceTransaction = mapper.Map<Transaction>(transferDto);
+        sourceTransaction.Id = Guid.NewGuid();
+        sourceTransaction.AccountId = accountId;
+        sourceTransaction.Timestamp = DateTime.UtcNow;
+
+        var destinationTransaction = new Transaction
+        {
+            Id = Guid.NewGuid(),
+            AccountId = destinationAccount.Id,
+            CounterpartyAccountId = accountId,
+            Amount = sourceTransaction.Amount,
+            Currency = sourceTransaction.Currency,
+            Type = destinationTransactionType,
+            Timestamp = DateTime.UtcNow
+        };
+
+        await transactionRepository.CreateAsync(sourceTransaction);
+        await transactionRepository.CreateAsync(destinationTransaction);
+        await accountRepository.UpdateAsync(sourceAccount);
+        await accountRepository.UpdateAsync(destinationAccount);
+
+        (sourceAccount.Balance, destinationAccount.Balance) = sourceTransaction.Type == TransactionType.Debit
+            ? (sourceAccount.Balance - sourceTransaction.Amount, destinationAccount.Balance + sourceTransaction.Amount)
+            : (sourceAccount.Balance + sourceTransaction.Amount, destinationAccount.Balance - sourceTransaction.Amount);
+
+        return [mapper.Map<TransactionDto>(sourceTransaction), mapper.Map<TransactionDto>(destinationTransaction)];
+    }
+
+    private static void CheckAccount(Guid accountId, [NotNull] Account? account, TransactionType type, decimal amount, string transactionCurrency)
+    {
+        if (account == null)
+        {
+            throw new NotFoundException($"Счет с id {accountId} не найден.");
+        }
+
+        if (!string.Equals(account.Currency, transactionCurrency, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ConflictException(
+                $"Валюта транзакции ({transactionCurrency}) не совпадает с валютой счета ({account.Currency}).");
+        }
+
+        if (type == TransactionType.Debit && account.Balance < amount)
+        {
+            throw new ConflictException("Недостаточно средств для проведения списания.");
+        }
+    }
+}

@@ -1,75 +1,76 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Simple_Account_Service.Features.Accounts.Commands.AddAccount;
-using Simple_Account_Service.Features.Accounts.Queries.GetAccountsList;
+using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
+using Simple_Account_Service.Features.Accounts.Commands.DeleteAccount;
+using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
+using Simple_Account_Service.Features.Accounts.Queries.CheckAccountExists;
+using Simple_Account_Service.Features.Accounts.Queries.GetAccounts;
 using Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
 
-namespace Simple_Account_Service.Features.Accounts
+namespace Simple_Account_Service.Features.Accounts;
+
+[ApiController]
+[Route("api/[controller]/[action]")]
+public class AccountsController(IMediator mediator) : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]/[action]")]
-    public class AccountsController(IMediator mediator) : ControllerBase
+    //todo как в тз
+    [HttpPost]
+    public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto createAccountDto)
     {
-        private readonly IMediator _mediator = mediator;
+        var response = await mediator.Send(new CreateAccountCommand(createAccountDto));
 
-        [HttpPost]
-        public async Task<ActionResult> CreateAccount([FromBody] Account account)
+        return Ok(response);
+    }
+
+    [HttpPut("{accountId:guid}")]
+    public async Task<IActionResult> UpdateAccount(Guid accountId, [FromBody] UpdateAccountDto updatedAccountDto)
+    {
+        var response = await mediator.Send(
+            new UpdateAccountCommand(accountId, updatedAccountDto));
+
+        return Ok(response);
+    }
+
+    [HttpDelete("{accountId:guid}")]
+    public async Task<IActionResult> DeleteAccount(Guid accountId)
+    {
+        await mediator.Send(new DeleteAccountCommand(accountId));
+
+        return NoContent();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAccounts()
+    {
+        var response = await mediator.Send(new GetAllAccountsQuery());
+
+        return Ok(response.ToList());
+    }
+
+
+    [HttpGet("{ownerId:guid}")]
+    public async Task<IActionResult> GetAccountStatement(Guid ownerId, [FromQuery] Guid? accountId,
+        DateTime startDate, DateTime endDate)
+    {
+
+        var response = await mediator.Send(
+            new GetAccountStatementQuery(ownerId, accountId, startDate, endDate));
+
+        return Ok(response);
+    }
+
+
+    //Посчитал излишним делать queries валидаторы только для пустого гуид, неконсистентно и уродливо, стоит поправить наверное
+    [HttpGet("{accountId:guid}")]
+    public async Task<IActionResult> AccountExists(Guid accountId)
+    {
+        if (accountId == Guid.Empty)
         {
-            await _mediator.Send(new AddAccount(account));
-
-            return StatusCode(201);
+            return BadRequest("Идентификатор владельца не может быть пустым.");
         }
 
-        [HttpPut("{id:guid}")]
-        public IActionResult UpdateAccount(Guid id, [FromBody] Account updatedAccount)
-        {
-            return Ok();
-        }
+        var response = await mediator.Send(new CheckAccountExistsQuery(accountId));
 
-        [HttpDelete("{id:guid}")]
-        public IActionResult DeleteAccount(Guid id)
-        {
-            return Ok();
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAccounts()
-        {
-            var response = await _mediator.Send(new GetAccountsList());
-
-            return Ok(response);
-        }
-
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetAccountById(Guid id)
-        {
-            var response = await _mediator.Send(new GetAccountStatement(id));
-
-            return Ok();
-        }
-
-        [HttpPost("{accountId:guid}")]
-        public IActionResult RegisterTransaction(Guid accountId, [FromBody] Transaction transaction)
-        {
-            return Ok();
-        }
-
-        [HttpPost("transfer")]
-        public IActionResult Transfer([FromBody] string request)
-        {
-            return Ok();
-        }
-
-        [HttpGet("{ownerId:guid}")]
-        public IActionResult GetStatement(Guid ownerId)
-        {
-            return Ok();
-        }
-
-        [HttpGet]
-        public IActionResult AccountExists([FromQuery] Guid ownerId)
-        {
-            return Ok();
-        }
+        return Ok(response);
     }
 }
