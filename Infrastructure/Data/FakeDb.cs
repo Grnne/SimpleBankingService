@@ -90,7 +90,7 @@ public class FakeDb
 
         var account = _accounts.FirstOrDefault(a => a.Id == updated.AccountId);
 
-        if (account != null)
+        if (account == null) return Task.FromResult(true);
         {
             var txnIndex = account.Transactions.FindIndex(t => t.Id == updated.Id);
 

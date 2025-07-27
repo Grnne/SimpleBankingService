@@ -1,8 +1,11 @@
-﻿using MediatR;
+﻿using JetBrains.Annotations;
+using MediatR;
+using Simple_Account_Service.Features.Transactions.Interfaces;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
-public class TransferBetweenAccountsCommandHandler(TransactionService service) : IRequestHandler<TransferBetweenAccountsCommand, List<TransactionDto>>
+[UsedImplicitly]
+public class TransferBetweenAccountsCommandHandler(ITransactionService service) : IRequestHandler<TransferBetweenAccountsCommand, List<TransactionDto>>
 {
     public async Task<List<TransactionDto>> Handle(TransferBetweenAccountsCommand request, CancellationToken cancellationToken)
     {

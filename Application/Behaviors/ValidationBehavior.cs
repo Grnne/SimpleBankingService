@@ -34,19 +34,3 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         return await next(cancellationToken).ConfigureAwait(false);
     }
 }
-
-
-// TODO maybe this stuff
-//var errorsDictionary = _validators
-//    .Select(x => x.Validate(context))
-//    .SelectMany(x => x.Errors)
-//    .Where(x => x != null)
-//    .GroupBy(
-//        x => x.PropertyName,
-//        x => x.ErrorMessage,
-//        (propertyName, errorMessages) => new
-//        {
-//            Key = propertyName,
-//            Values = errorMessages.Distinct().ToArray()
-//        })
-//    .ToDictionary(x => x.Key, x => x.Values);

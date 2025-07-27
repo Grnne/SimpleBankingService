@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Simple_Account_Service.Application.Exceptions;
 
@@ -8,39 +9,57 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        var problemDetails = new ProblemDetails
-        {
-            Instance = httpContext.Request.Path
-        };
+        logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
 
-        if (exception is FluentValidation.ValidationException fluentException)
+        ProblemDetails problemDetails;
+
+        switch (exception)
         {
-            problemDetails.Title = "One or more validation errors occurred.";
-            problemDetails.Type = "https://datatracker.ietf.org/doc/html/rfc7807";
-            httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-            var validationErrors = fluentException.Errors.Select(error => error.ErrorMessage).ToList();
-            problemDetails.Extensions.Add("errors", validationErrors);
-        }
-        else if (exception is NotFoundException)
-        {
-            problemDetails.Title = exception.Message;
-            httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-        }
-        else if (exception is ConflictException)
-        {
-            problemDetails.Title = exception.Message;
-            httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
-        }
-        else
-        {
-            problemDetails.Title = "An unexpected error occurred.";
-            httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            case ValidationException validationException:
+            {
+                var validationErrors = validationException.Errors;
+
+                problemDetails = new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Validation errors",
+                    Detail = string.Join(" ", validationErrors.Select(e =>
+                        $"{e.PropertyName}: {e.ErrorMessage}"))
+                };
+                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                break;
+            }
+            case ConflictException conflictException:
+                problemDetails = new ProblemDetails
+                {
+                    Status = StatusCodes.Status409Conflict,
+                    Title = "Conflict errors",
+                    Detail = conflictException.Message
+                };
+                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                break;
+            case NotFoundException notFoundException:
+                problemDetails = new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Not Found errors",
+                    Detail = notFoundException.Message
+                };
+                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                break;
+            default:
+                problemDetails = new ProblemDetails
+                {
+                    Status = StatusCodes.Status500InternalServerError,
+                    Title = "Internal Server Error"
+                };
+                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                break;
         }
 
-        logger.LogError("{ProblemDetailsTitle}", problemDetails.Title);
+        httpContext.Response.ContentType = "application/problem+json";
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
-        problemDetails.Status = httpContext.Response.StatusCode;
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken).ConfigureAwait(false);
         return true;
     }
 }

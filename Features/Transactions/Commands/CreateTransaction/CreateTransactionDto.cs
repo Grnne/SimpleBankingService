@@ -1,9 +1,12 @@
-﻿using Simple_Account_Service.Features.Transactions.Entities;
+﻿using JetBrains.Annotations;
+using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 
+[UsedImplicitly]
 public class CreateTransactionDto
 {
+    [UsedImplicitly]
     public Guid? CounterpartyAccountId { get; set; }
 
     public decimal Amount { get; set; }

@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using JetBrains.Annotations;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service.Features.Transactions;
 
+[UsedImplicitly]
 public class TransactionsMappingProfile : Profile
 {
     public TransactionsMappingProfile()
@@ -13,7 +15,7 @@ public class TransactionsMappingProfile : Profile
 
         CreateMap<CreateTransactionDto, Transaction>()
             .ForAllMembers(opt => opt.Condition(
-                (src, dest, srcMember) => srcMember != null));
+                srcMember => srcMember != null));
 
         CreateMap<TransferDto, Transaction>()
             .ForMember(dest => dest.CounterpartyAccountId, opt => opt.MapFrom(src => src.DestinationAccountId))

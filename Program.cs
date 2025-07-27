@@ -3,8 +3,10 @@ using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Features.Accounts;
+using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions;
+using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Middleware;
@@ -40,8 +42,8 @@ public class Program
         builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 
-        builder.Services.AddScoped<AccountsService, AccountsService>(); //TODO interfaces
-        builder.Services.AddScoped<TransactionService, TransactionService>();
+        builder.Services.AddScoped<IAccountsService, AccountsService>(); //TODO interfaces
+        builder.Services.AddScoped<ITransactionService, TransactionService>();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
@@ -51,15 +53,15 @@ public class Program
 
         var app = builder.Build();
 
-        if (app.Environment.IsDevelopment())
+        //Refactor for build\dev
+        //app.UseDeveloperExceptionPage(); 
+        app.UseExceptionHandler();
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Simple Account Service API V1");
-                c.RoutePrefix = string.Empty;
-            });
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Simple Account Service API V1");
+            c.RoutePrefix = string.Empty;
+        });
 
         app.UseHttpsRedirection();
 

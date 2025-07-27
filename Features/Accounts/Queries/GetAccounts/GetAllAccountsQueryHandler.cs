@@ -1,8 +1,11 @@
-﻿using MediatR;
+﻿using JetBrains.Annotations;
+using MediatR;
+using Simple_Account_Service.Features.Accounts.Interfaces;
 
 namespace Simple_Account_Service.Features.Accounts.Queries.GetAccounts;
 
-public class GetAllAccountsQueryHandler(AccountsService service) : IRequestHandler<GetAllAccountsQuery, IEnumerable<AccountDto>>
+[UsedImplicitly]
+public class GetAllAccountsQueryHandler(IAccountsService service) : IRequestHandler<GetAllAccountsQuery, IEnumerable<AccountDto>>
 {
     public async Task<IEnumerable<AccountDto>> Handle(GetAllAccountsQuery request, CancellationToken cancellationToken)
     {

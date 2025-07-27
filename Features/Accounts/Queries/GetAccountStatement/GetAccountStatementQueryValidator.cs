@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using JetBrains.Annotations;
 
 namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
 
+[UsedImplicitly]
 public class CheckAccountExistsQueryValidator : AbstractValidator<GetAccountStatementQuery>
 {
     public CheckAccountExistsQueryValidator()

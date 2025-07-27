@@ -9,12 +9,10 @@ namespace Simple_Account_Service.Features.Transactions;
 [Route("api/[controller]/[action]/{accountId:guid}")]
 public class TransactionController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator = mediator;
-
     [HttpPost("")]
     public async Task<IActionResult> CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
-        var response = await _mediator.Send(
+        var response = await mediator.Send(
             new CreateTransactionCommand(accountId, createTransactionDto));
 
         return Ok(response);
@@ -23,7 +21,7 @@ public class TransactionController(IMediator mediator) : ControllerBase
     [HttpPost("")]
     public async Task<IActionResult> TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto transferDto)
     {
-        var response = await _mediator.Send(
+        var response = await mediator.Send(
             new TransferBetweenAccountsCommand(accountId, transferDto));
 
         return Ok(response);
