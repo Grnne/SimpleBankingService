@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
@@ -9,6 +10,7 @@ namespace Simple_Account_Service.Features.Transactions;
 /// Контроллер для управления транзакциями на счетах.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/[controller]/[action]/{accountId:guid}")]
 public class TransactionsController(IMediator mediator) : ControllerBase
 {

@@ -1,4 +1,7 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
@@ -12,6 +15,7 @@ using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Reflection;
+using System.Text;
 
 namespace Simple_Account_Service;
 
@@ -27,6 +31,26 @@ public class Program
 
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
+
+        // TODO после кейклоки
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = "TestIssuer",
+                    ValidateAudience = true,
+                    ValidAudience = "TestAudience",
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            "asdfasdfasfasdfasdfasdfsSDFSDFdfasdfОчень_секретный_ключ_для_тестов_12345")),
+                    ValidateIssuerSigningKey = true
+                };
+                options.RequireHttpsMetadata = false;
+            });
+            
 
         builder.Services.AddMediatR(cfg =>
         {
@@ -48,7 +72,6 @@ public class Program
             });
         });
 
-
         builder.Services.AddAutoMapper(typeof(Program));
 
         builder.Services.AddSingleton<FakeDb>();
@@ -68,7 +91,28 @@ public class Program
 
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
             c.IncludeXmlComments(xmlPath);
+
+            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme.",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+            {
+                new OpenApiSecurityScheme {
+                    Reference = new OpenApiReference {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                new string[] {}
+            }});
         });
 
         var app = builder.Build();

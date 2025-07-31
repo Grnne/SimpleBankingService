@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.DeleteAccount;
@@ -14,6 +15,7 @@ namespace Simple_Account_Service.Features.Accounts;
 /// Контроллер для управления счетами.
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/[controller]/[action]")]
 public class AccountsController(IMediator mediator) : ControllerBase
 {
