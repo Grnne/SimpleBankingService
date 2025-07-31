@@ -1,0 +1,6 @@
+services:
+  simpleaccountservice:
+    image: ${DOCKER_REGISTRY-}simpleaccountservice
+    build:
+      context: .
+      dockerfile: SimpleAccountService/Dockerfile
