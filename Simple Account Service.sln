@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple Account Service", "SimpleAccountService/Simple Account Service.csproj", "{5758BCAA-A22A-4F29-9BF8-FFBEA1B71CB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple Account Service", "SimpleAccountService\Simple Account Service.csproj", "{5758BCAA-A22A-4F29-9BF8-FFBEA1B71CB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAccountService.Tests", "SimpleAccountService.Tests\SimpleAccountService.Tests.csproj", "{918454A1-FD1F-4A45-B15F-66E2BCA89467}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{5758BCAA-A22A-4F29-9BF8-FFBEA1B71CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5758BCAA-A22A-4F29-9BF8-FFBEA1B71CB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5758BCAA-A22A-4F29-9BF8-FFBEA1B71CB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{918454A1-FD1F-4A45-B15F-66E2BCA89467}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{918454A1-FD1F-4A45-B15F-66E2BCA89467}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{918454A1-FD1F-4A45-B15F-66E2BCA89467}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{918454A1-FD1F-4A45-B15F-66E2BCA89467}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
