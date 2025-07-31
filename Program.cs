@@ -15,6 +15,8 @@ using System.Reflection;
 
 namespace Simple_Account_Service;
 
+//TODO wrap responses
+
 public class Program
 {
     public static void Main(string[] args)
@@ -22,7 +24,10 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
+
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+        ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
+
         builder.Services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
@@ -32,6 +37,17 @@ public class Program
 
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", b =>
+            {
+                b.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
 
         builder.Services.AddAutoMapper(typeof(Program));
 
@@ -72,6 +88,8 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+
+        app.UseCors("AllowAll");
 
         app.Run();
     }
