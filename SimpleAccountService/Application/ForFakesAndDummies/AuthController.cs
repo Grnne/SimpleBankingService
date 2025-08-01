@@ -7,6 +7,16 @@ namespace Simple_Account_Service.Application.ForFakesAndDummies;
 [Route("api/[controller]")]
 public class AuthController(IHttpClientFactory httpClientFactory) : ControllerBase
 {
+
+    /// <summary>
+    /// Заглушка, дергает access token из keycloak, в формате "Bearer {token}"
+    /// </summary>
+    /// <remarks>
+    /// Выполняет POST-запрос к токен-эндпоинту Keycloak с credentials первого пользователя в базе
+    /// Возвращает или ошибку если не прогрузился сервер авторизации, либо "Bearer {token}"
+    /// Эту строку нужно вставить в поле для авторизации сверху справа под кнопкой Authorize и нажать Authorize
+    /// Потом пользоваться остальными эндпоинтами
+    /// </remarks>
     [HttpPost("token")]
     public async Task<IActionResult> GetToken()
     {
@@ -16,7 +26,7 @@ public class AuthController(IHttpClientFactory httpClientFactory) : ControllerBa
         {
             new KeyValuePair<string, string>("grant_type", "password"),
             new KeyValuePair<string, string>("client_id", "my_client"),
-            new KeyValuePair<string, string>("username", "test"),
+            new KeyValuePair<string, string>("username", "test1"),
             new KeyValuePair<string, string>("password", "password")
         };
 

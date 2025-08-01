@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using JetBrains.Annotations;
+using Simple_Account_Service.Application.ForFakesAndDummies;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 
@@ -19,7 +20,7 @@ public sealed class CreateTransactionCommandValidator : AbstractValidator<Create
 
         RuleFor(x => x.CreateTransactionDto.Currency)
             .NotEmpty().WithMessage("Валюта обязательна для заполнения.")
-            .Length(3).WithMessage("Код валюты должен содержать ровно 3 символа.");
+            .Must(Currency.IsSupported).WithMessage("Указана неподдерживаемая валюта.");
 
         RuleFor(x => x.CreateTransactionDto.Type)
             .IsInEnum().WithMessage("Недопустимый тип транзакции.");

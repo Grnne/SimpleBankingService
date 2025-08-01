@@ -2,11 +2,11 @@
 
 public class MbResult<T>
 {
-    public bool Success { get; set; }
+    public bool Success { get; }
 
-    public T? Response { get; set; } = default;
+    public T? Response { get; } = default;
 
-    public MbError? Error { get; set; } = null;
+    public MbError? Error { get; } = null;
 
     public MbResult(T response)
     {
@@ -19,16 +19,4 @@ public class MbResult<T>
         Success = false;
         Error = error;
     }
-}
-
-
-public class MbError
-{
-    public string Code { get; set; } = null!;
-
-    public string Message { get; set; } = null!;
-
-    public string Description { get; set; } = string.Empty;
-
-    // TODO выделить потом на класс, мб сделать список ошибок
 }

@@ -9,8 +9,7 @@ public class FakeDb
     private readonly List<Owner> _users = [];
     private readonly List<Account> _accounts = [];
     private readonly List<Transaction> _transactions = [];
-    private readonly List<Currency> _currencies = [];
-
+    
     public FakeDb()
     {
         InitializeFakeData();
@@ -170,61 +169,13 @@ public class FakeDb
 
     #endregion
 
-    #region Currency
-
-    public Task<Currency?> GetCurrencyByCodeAsync(string code) =>
-        Task.FromResult(_currencies.FirstOrDefault(c => c.Code == code));
-
-    public Task<Currency> AddCurrencyAsync(Currency currency)
-    {
-        _currencies.Add(currency);
-
-        return Task.FromResult(currency);
-    }
-
-    public Task<bool> UpdateCurrencyAsync(Currency updated)
-    {
-        var index = _currencies.FindIndex(c => c.Code == updated.Code);
-
-        if (index < 0)
-        {
-            return Task.FromResult(false);
-        }
-
-        _currencies[index] = updated;
-
-        return Task.FromResult(true);
-    }
-
-    public Task<bool> RemoveCurrencyAsync(string code)
-    {
-        var currency = _currencies.FirstOrDefault(c => c.Code == code);
-
-        if (currency == null)
-        {
-            return Task.FromResult(false);
-        }
-
-        _currencies.Remove(currency);
-
-        return Task.FromResult(true);
-    }
-
-    #endregion
-
     private void InitializeFakeData()
     {
         _users.AddRange(
         [
-            new Owner { Id = Guid.NewGuid(), Name = "Иван" },
-            new Owner { Id = Guid.NewGuid(), Name = "Анна" }
-        ]);
-
-        _currencies.AddRange(
-        [
-            new Currency { Code = "RUB", Name = "Российский рубль" },
-            new Currency { Code = "USD", Name = "Доллар США" },
-            new Currency { Code = "EUR", Name = "Евро" }
+            new Owner { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "test1" },
+            new Owner { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "test2" },
+            new Owner { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Name = "test3" }
         ]);
 
         var account1 = new Account

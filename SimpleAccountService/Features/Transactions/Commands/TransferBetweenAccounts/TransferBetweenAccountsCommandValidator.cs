@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using JetBrains.Annotations;
+using Simple_Account_Service.Application.ForFakesAndDummies;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
@@ -29,8 +30,7 @@ public sealed class TransferBetweenAccountsCommandValidator : AbstractValidator<
         RuleFor(x => x.TransferDto.Currency)
             .NotEmpty()
             .WithMessage("Валюта обязательна для заполнения.")
-            .Length(3)
-            .WithMessage("Код валюты должен содержать ровно 3 символа.");
+            .Must(Currency.IsSupported).WithMessage("Указана неподдерживаемая валюта.");
 
         RuleFor(x => x.TransferDto.Description)
             .MaximumLength(250)

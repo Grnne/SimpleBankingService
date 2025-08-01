@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
+using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
@@ -13,6 +14,7 @@ using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
+using System.Net;
 using System.Reflection;
 
 namespace Simple_Account_Service;
@@ -26,11 +28,10 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
-
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
 
-        // TODO после кейклоки
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
@@ -43,6 +44,21 @@ public class Program
                     ValidateAudience = true,
                     ValidateLifetime = true
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+
+                        var mbError = new MbError(HttpStatusCode.Unauthorized, "Unauthorized", "Authentication is required or token is invalid.");
+                        var result = new MbResult<object>(mbError);
+
+                        await context.Response.WriteAsJsonAsync(result);
+                    }
+                };
             });
 
         builder.Services.AddAuthorization();
@@ -54,7 +70,6 @@ public class Program
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
 
-        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
 
         builder.Services.AddCors(options =>
@@ -73,7 +88,6 @@ public class Program
 
         builder.Services.AddScoped<IAccountRepository, AccountRepository>();
         builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
-        builder.Services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
 
         builder.Services.AddScoped<IAccountsService, AccountsService>(); //TODO interfaces
@@ -113,7 +127,6 @@ public class Program
         //For dummy keycloak token request
         builder.Services.AddHttpClient(); 
 
-
         var app = builder.Build();
 
         //Refactor for build\dev
@@ -123,13 +136,19 @@ public class Program
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Simple Account Service API V1");
-            c.RoutePrefix = string.Empty;
+            c.RoutePrefix = "swagger";
         });
 
         app.UseHttpsRedirection();
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.MapGet("/", context =>
+        {
+            context.Response.Redirect("/swagger");
+            return Task.CompletedTask;
+        });
 
         app.MapControllers();
 

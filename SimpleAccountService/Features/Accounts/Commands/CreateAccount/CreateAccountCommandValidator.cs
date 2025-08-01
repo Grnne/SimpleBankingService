@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using JetBrains.Annotations;
+using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Features.Accounts.Entities;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
@@ -17,7 +18,7 @@ public sealed class CreateAccountCommandValidator : AbstractValidator<CreateAcco
 
         RuleFor(x => x.Request.Currency)
             .NotEmpty().WithMessage("Валюта обязательна для заполнения.")
-            .Length(3).WithMessage("Код валюты должен содержать ровно 3 символа.");
+            .Must(Currency.IsSupported).WithMessage("Указана неподдерживаемая валюта.");
 
         When(x => x.Request.Type is AccountType.Deposit or AccountType.Credit, () =>
         {

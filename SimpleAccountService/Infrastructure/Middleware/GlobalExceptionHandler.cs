@@ -1,7 +1,8 @@
-﻿using FluentValidation;
+﻿using System.Net;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Simple_Account_Service.Application.Exceptions;
+using Simple_Account_Service.Application.Models;
 
 namespace Simple_Account_Service.Infrastructure.Middleware;
 
@@ -11,54 +12,45 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
     {
         logger.LogError(exception, "Exception occurred: {Message}", exception.Message);
 
-        ProblemDetails problemDetails;
+        MbError mbError;
+        HttpStatusCode statusCode;
 
         switch (exception)
         {
             case ValidationException validationException:
                 {
-                    var validationErrors = validationException.Errors;
+                    var errorMessages = validationException.Errors
+                        .Select(e => $"{e.PropertyName}: {e.ErrorMessage}");
+                    var allMessages = string.Join(" ", errorMessages);
 
-                    problemDetails = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                        Title = "Validation errors",
-                        Detail = string.Join(" ", validationErrors.Select(e =>
-                            $"{e.PropertyName}: {e.ErrorMessage}"))
-                    };
-                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    mbError = new MbError(HttpStatusCode.BadRequest, "Validation errors", allMessages);
+                    statusCode = HttpStatusCode.BadRequest;
                     break;
                 }
             case ConflictException conflictException:
-                problemDetails = new ProblemDetails
-                {
-                    Status = StatusCodes.Status409Conflict,
-                    Title = "Conflict errors",
-                    Detail = conflictException.Message
-                };
-                httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+                mbError = new MbError(HttpStatusCode.Conflict, "Conflict error", conflictException.Message);
+                statusCode = HttpStatusCode.Conflict;
                 break;
             case NotFoundException notFoundException:
-                problemDetails = new ProblemDetails
-                {
-                    Status = StatusCodes.Status404NotFound,
-                    Title = "Not Found errors",
-                    Detail = notFoundException.Message
-                };
-                httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
+                mbError = new MbError(HttpStatusCode.NotFound, "Not Found error", notFoundException.Message);
+                statusCode = HttpStatusCode.NotFound;
+                break;
+            case UnauthorizedAccessException unauthorizedAccessException:
+                mbError = new MbError(HttpStatusCode.Unauthorized, "Unauthorized", unauthorizedAccessException.Message);
+                statusCode = HttpStatusCode.Unauthorized;
                 break;
             default:
-                problemDetails = new ProblemDetails
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    Title = "Internal Server Error"
-                };
-                httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                mbError = new MbError(HttpStatusCode.InternalServerError, "Internal Server Error");
+                statusCode = HttpStatusCode.InternalServerError;
                 break;
         }
 
-        httpContext.Response.ContentType = "application/problem+json";
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        var result = new MbResult<object>(mbError);
+
+        httpContext.Response.StatusCode = (int)statusCode;
+        httpContext.Response.ContentType = "application/json";
+
+        await httpContext.Response.WriteAsJsonAsync(result, cancellationToken);
 
         return true;
     }
