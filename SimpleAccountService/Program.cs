@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
@@ -15,7 +14,6 @@ using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Reflection;
-using System.Text;
 
 namespace Simple_Account_Service;
 
@@ -36,21 +34,18 @@ public class Program
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                options.Authority = "http://keycloak:8080/realms/my_realm"; 
+                options.Audience = "my_client"; 
+                options.RequireHttpsMetadata = false; 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidIssuer = "TestIssuer",
                     ValidateAudience = true,
-                    ValidAudience = "TestAudience",
-                    ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(
-                            "asdfasdfasfasdfasdfasdfsSDFSDFdfasdfОчень_секретный_ключ_для_тестов_12345")),
-                    ValidateIssuerSigningKey = true
+                    ValidateLifetime = true
                 };
-                options.RequireHttpsMetadata = false;
             });
-            
+
+        builder.Services.AddAuthorization();
 
         builder.Services.AddMediatR(cfg =>
         {
@@ -111,9 +106,13 @@ public class Program
                         Id = "Bearer"
                     }
                 },
-                new string[] {}
+                Array.Empty<string>()
             }});
         });
+
+        //For dummy keycloak token request
+        builder.Services.AddHttpClient(); 
+
 
         var app = builder.Build();
 
@@ -129,6 +128,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

@@ -16,19 +16,19 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         switch (exception)
         {
             case ValidationException validationException:
-            {
-                var validationErrors = validationException.Errors;
-
-                problemDetails = new ProblemDetails
                 {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Validation errors",
-                    Detail = string.Join(" ", validationErrors.Select(e =>
-                        $"{e.PropertyName}: {e.ErrorMessage}"))
-                };
-                httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                break;
-            }
+                    var validationErrors = validationException.Errors;
+
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status400BadRequest,
+                        Title = "Validation errors",
+                        Detail = string.Join(" ", validationErrors.Select(e =>
+                            $"{e.PropertyName}: {e.ErrorMessage}"))
+                    };
+                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    break;
+                }
             case ConflictException conflictException:
                 problemDetails = new ProblemDetails
                 {
