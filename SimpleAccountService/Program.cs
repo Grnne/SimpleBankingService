@@ -35,9 +35,9 @@ public class Program
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = "http://keycloak:8080/realms/my_realm"; 
-                options.Audience = "my_client"; 
-                options.RequireHttpsMetadata = false; 
+                options.Authority = "http://keycloak:8080/realms/my_realm";
+                options.Audience = "my_client";
+                options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
@@ -89,8 +89,7 @@ public class Program
         builder.Services.AddScoped<IAccountRepository, AccountRepository>();
         builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
         builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
-
-        builder.Services.AddScoped<IAccountsService, AccountsService>(); //TODO interfaces
+        builder.Services.AddScoped<IAccountsService, AccountsService>();
         builder.Services.AddScoped<ITransactionService, TransactionsService>();
 
         builder.Services.AddEndpointsApiExplorer();
@@ -125,7 +124,7 @@ public class Program
         });
 
         //For dummy keycloak token request
-        builder.Services.AddHttpClient(); 
+        builder.Services.AddHttpClient();
 
         var app = builder.Build();
 
@@ -150,9 +149,9 @@ public class Program
             return Task.CompletedTask;
         });
 
-        app.MapControllers();
-
         app.UseCors("AllowAll");
+
+        app.MapControllers();
 
         app.Run();
     }
