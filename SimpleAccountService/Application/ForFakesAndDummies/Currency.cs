@@ -2,26 +2,26 @@
 
 public class Currency
 {
-    private static HashSet<string> AllowedCurrencies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    private static HashSet<string> AllowedCurrencies { get; } = new(StringComparer.OrdinalIgnoreCase)
     {
         "USD",
         "EUR",
         "RUB",
-        "JPY", 
-        "GBP", 
-        "CHF", 
-        "CNY", 
-        "AUD", 
-        "CAD", 
-        "NZD", 
-        "SEK", 
-        "NOK", 
-        "DKK", 
-        "TRY", 
-        "BRL", 
-        "INR", 
-        "MXN", 
-        "KRW" 
+        "JPY",
+        "GBP",
+        "CHF",
+        "CNY",
+        "AUD",
+        "CAD",
+        "NZD",
+        "SEK",
+        "NOK",
+        "DKK",
+        "TRY",
+        "BRL",
+        "INR",
+        "MXN",
+        "KRW"
     };
 
     public static bool IsSupported(string currencyCode) => AllowedCurrencies.Contains(currencyCode);

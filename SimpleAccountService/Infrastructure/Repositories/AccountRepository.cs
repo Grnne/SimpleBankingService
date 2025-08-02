@@ -32,14 +32,9 @@ public class AccountRepository(FakeDb db) : IAccountRepository
         return entity;
     }
 
-    public async Task DeleteAsync(Guid accountId)
+    public async Task<bool> DeleteAsync(Guid accountId)
     {
-        var deleted = await db.RemoveAccountAsync(accountId);
-
-        if (!deleted)
-        {
-            throw new InvalidOperationException("Ошибка удаления счета на уровне базы данных. О как!");
-        }
+        return await db.RemoveAccountAsync(accountId);
     }
 
     public async Task<IEnumerable<Account>> GetAllAccountsAsync()

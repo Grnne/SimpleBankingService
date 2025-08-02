@@ -8,5 +8,5 @@ public interface IBaseRepository<T> where T : class
 
     public Task<T> UpdateAsync(T entity);
 
-    public Task DeleteAsync(Guid id);
+    public Task<bool> DeleteAsync(Guid id);
 }

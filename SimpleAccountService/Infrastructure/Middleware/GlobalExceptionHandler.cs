@@ -1,8 +1,8 @@
-﻿using System.Net;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Application.Models;
+using System.Net;
 
 namespace Simple_Account_Service.Infrastructure.Middleware;
 

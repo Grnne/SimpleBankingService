@@ -40,9 +40,9 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     ///     }
     /// </remarks>
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MbResult<TransactionDto>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<TransactionDto>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<TransactionDto>))]
-    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<TransactionDto>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<string>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<string>))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<string>))]
     [HttpPost]
     public async Task<IActionResult> CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
@@ -77,9 +77,9 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     ///     }
     /// </remarks>
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MbResult<List<TransactionDto>>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<List<TransactionDto>>))]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<List<TransactionDto>>))]
-    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<List<TransactionDto>>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<string>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<string>))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<string>))]
     [HttpPost]
     public async Task<IActionResult> TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto transferDto)
     {

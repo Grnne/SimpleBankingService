@@ -1,14 +1,17 @@
 ﻿using JetBrains.Annotations;
 using MediatR;
-using Simple_Account_Service.Features.Accounts.Interfaces;
+using Simple_Account_Service.Application.Models;
+using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 
 namespace Simple_Account_Service.Features.Accounts.Queries.CheckAccountExists;
 
 [UsedImplicitly]
-public class CheckAccountExistsQueryHandler(IAccountsService service) : IRequestHandler<CheckAccountExistsQuery, bool>
+public class CheckAccountExistsQueryHandler(IAccountRepository repository) : IRequestHandler<CheckAccountExistsQuery, MbResult<bool>>
 {
-    public Task<bool> Handle(CheckAccountExistsQuery request, CancellationToken cancellationToken)
+    public async Task<MbResult<bool>> Handle(CheckAccountExistsQuery request, CancellationToken cancellationToken)
     {
-        return service.CheckAccountExists(request.AccountId);
+        var result = await repository.GetByIdAsync(request.AccountId);
+
+        return new MbResult<bool>(result != null);
     }
 }

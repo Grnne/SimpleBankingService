@@ -9,7 +9,7 @@ public class FakeDb
     private readonly List<Owner> _users = [];
     private readonly List<Account> _accounts = [];
     private readonly List<Transaction> _transactions = [];
-    
+
     public FakeDb()
     {
         InitializeFakeData();

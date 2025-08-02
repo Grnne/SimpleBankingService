@@ -5,8 +5,6 @@ using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Application.Models;
-using Simple_Account_Service.Features.Accounts;
-using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Interfaces;
@@ -19,7 +17,7 @@ using System.Reflection;
 
 namespace Simple_Account_Service;
 
-//TODO wrap responses
+//TODO https certificates self-signed or let's encrypt
 
 public class Program
 {
@@ -89,7 +87,6 @@ public class Program
         builder.Services.AddScoped<IAccountRepository, AccountRepository>();
         builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
         builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
-        builder.Services.AddScoped<IAccountsService, AccountsService>();
         builder.Services.AddScoped<ITransactionService, TransactionsService>();
 
         builder.Services.AddEndpointsApiExplorer();

@@ -1,14 +1,18 @@
-﻿using JetBrains.Annotations;
+﻿using AutoMapper;
+using JetBrains.Annotations;
 using MediatR;
-using Simple_Account_Service.Features.Accounts.Interfaces;
+using Simple_Account_Service.Application.Models;
+using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 
 namespace Simple_Account_Service.Features.Accounts.Queries.GetAccounts;
 
 [UsedImplicitly]
-public class GetAllAccountsQueryHandler(IAccountsService service) : IRequestHandler<GetAllAccountsQuery, IEnumerable<AccountDto>>
+public class GetAllAccountsQueryHandler(IAccountRepository repository, IMapper mapper) : IRequestHandler<GetAllAccountsQuery, MbResult<IEnumerable<AccountDto>>>
 {
-    public async Task<IEnumerable<AccountDto>> Handle(GetAllAccountsQuery request, CancellationToken cancellationToken)
+    public async Task<MbResult<IEnumerable<AccountDto>>> Handle(GetAllAccountsQuery request, CancellationToken cancellationToken)
     {
-        return await service.GetAllAccountsAsync();
+        var accounts = await repository.GetAllAccountsAsync();
+
+        return new MbResult<IEnumerable<AccountDto>>(mapper.Map<IEnumerable<AccountDto>>(accounts));
     }
 }

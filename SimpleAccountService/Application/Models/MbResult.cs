@@ -4,9 +4,9 @@ public class MbResult<T>
 {
     public bool Success { get; }
 
-    public T? Response { get; } = default;
+    public T? Response { get; }
 
-    public MbError? Error { get; } = null;
+    public MbError? Error { get; }
 
     public MbResult(T response)
     {

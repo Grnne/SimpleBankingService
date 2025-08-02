@@ -22,8 +22,8 @@ public class TransactionRepository(FakeDb db) : ITransactionRepository
         return entity;
     }
 
-    public async Task DeleteAsync(Guid accountId)
+    public async Task<bool> DeleteAsync(Guid accountId)
     {
-        await db.RemoveTransactionAsync(accountId);
+        return await db.RemoveTransactionAsync(accountId);
     }
 }

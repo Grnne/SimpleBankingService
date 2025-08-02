@@ -1,12 +1,11 @@
-﻿using Simple_Account_Service.Application.Models;
-using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
-using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
+﻿using Simple_Account_Service.Features.Accounts.Entities;
+using Simple_Account_Service.Features.Transactions.Entities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Simple_Account_Service.Features.Transactions.Interfaces;
 
 public interface ITransactionService
 {
-    Task<MbResult<TransactionDto>> CreateTransactionAsync(Guid accountId, CreateTransactionDto createTransactionDto);
-
-    Task<MbResult<List<TransactionDto>>> TransferBetweenAccounts(Guid accountId, TransferDto transferDto);
+    void CheckAccount(Guid accountId, [NotNull] Account? account, TransactionType type, decimal amount,
+        string transactionCurrency);
 }

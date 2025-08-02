@@ -21,8 +21,8 @@ public class OwnerRepository(FakeDb db) : IOwnerRepository
         return entity;
     }
 
-    public async Task DeleteAsync(Guid accountId)
+    public async Task<bool> DeleteAsync(Guid accountId)
     {
-        await db.RemoveOwnerAsync(accountId);
+        return await db.RemoveOwnerAsync(accountId);
     }
 }

@@ -1,16 +1,46 @@
-﻿using JetBrains.Annotations;
+﻿using AutoMapper;
+using JetBrains.Annotations;
 using MediatR;
-using Simple_Account_Service.Features.Accounts.Interfaces;
+using Simple_Account_Service.Application.Exceptions;
+using Simple_Account_Service.Application.Models;
+using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
 
 [UsedImplicitly]
-public class UpdateAccountCommandHandler(IAccountsService service) : IRequestHandler<UpdateAccountCommand, AccountDto>
+public class UpdateAccountCommandHandler(IAccountRepository repository, IMapper mapper) : IRequestHandler<UpdateAccountCommand, MbResult<AccountDto>>
 {
-    public async Task<AccountDto> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
+    public async Task<MbResult<AccountDto>> Handle(UpdateAccountCommand request, CancellationToken cancellationToken)
     {
-        var response = service.UpdateAccountAsync(request.AccountId, request.Request);
+        var account = await repository.GetByIdAsync(request.AccountId);
 
-        return await response;
+        if (account == null)
+        {
+            throw new NotFoundException($"Счет {request.AccountId} не найден.");
+        }
+
+        if (account.ClosedAt != null)
+        {
+            throw new ConflictException("Нельзя изменить или удалить уже закрытый счет.");
+        }
+
+        if (request.Request.ClosedAt != null)
+        {
+            if (request.Request.ClosedAt < account.CreatedAt)
+            {
+                throw new ConflictException("Дата закрытия счета должна быть после даты открытия");
+            }
+
+            account.ClosedAt = request.Request.ClosedAt;
+        }
+
+        if (request.Request.InterestRate != null)
+        {
+            account.InterestRate = request.Request.InterestRate;
+        }
+
+        var response = await repository.UpdateAsync(account);
+
+        return new MbResult<AccountDto>(mapper.Map<AccountDto>(response));
     }
 }
