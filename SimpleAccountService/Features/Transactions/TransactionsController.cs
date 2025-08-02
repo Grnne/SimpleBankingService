@@ -23,7 +23,7 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     /// <list type="bullet">
     /// <item><description>Amount — сумма транзакции (decimal).</description></item>
     /// <item><description>Currency — валюта (ISO 4217), например "USD", "EUR".</description></item>
-    /// <item><description>Type — тип транзакции, 0 для Credit и 1 для Debit.</description></item>
+    /// <item><description>Type — тип транзакции, Credit или Debit.</description></item>
     /// <item><description>Description — описание/комментарий (string, nullable).</description></item>
     /// </list>
     /// </param>
@@ -60,7 +60,7 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     /// <list type="bullet">
     /// <item><description>Amount — сумма перевода (decimal).</description></item>
     /// <item><description>Currency — валюта перевода (ISO 4217), например "EUR", "USD".</description></item>
-    /// <item><description>Type — тип транзакции, 0 для Credit и 1 для Debit.</description></item>
+    /// <item><description>Type — тип транзакции, Credit или Debit.</description></item>
     /// <item><description>Description — описание перевода (string, nullable).</description></item>
     /// </list>
     /// </param>

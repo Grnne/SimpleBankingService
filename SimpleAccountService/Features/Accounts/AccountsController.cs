@@ -23,7 +23,14 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <summary>
     /// Создать новый счет.
     /// </summary>
-    /// <param name="createAccountDto">Данные для создания счета.</param>
+    ///  <param name="createAccountDto">Данные для создания счета:
+    /// <list type="bullet">
+    /// <item><description>OwnerId — уникальный идентификатор владельца счета (Guid).</description></item>
+    /// <item><description>Type — тип счета: Checking, Deposit, Credit.</description></item>
+    /// <item><description>Currency — валюта счета в формате ISO 4217, например "USD", "EUR".</description></item>
+    /// <item><description>InterestRate — процентная ставка (опционально).</description></item>
+    /// </list>
+    /// </param>
     /// <returns>Возвращает созданный счет с кодом 201 Created, внутри MbResult.</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MbResult<AccountDto>))]
@@ -40,7 +47,12 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// Частично обновить данные счета.
     /// </summary>
     /// <param name="accountId">Идентификатор счета для обновления (Guid).</param>
-    /// <param name="updatedAccountDto">Данные для обновления счета.</param>
+    /// <param name="updatedAccountDto">Данные для обновления счета. Поля необязательны:
+    /// <list type="bullet">
+    /// <item><description>InterestRate — новая процентная ставка (опционально).</description></item>
+    /// <item><description>ClosedAt — дата закрытия счета (опционально).</description></item>
+    /// </list>
+    /// </param>
     /// <returns>Возвращает обновленный счет с кодом 200 OK, внутри MbResult.</returns>
     [HttpPatch("{accountId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MbResult<AccountDto>))]
@@ -90,6 +102,11 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <param name="startDate">Дата начала периода (включительно).</param>
     /// <param name="endDate">Дата конца периода (включительно).</param>
     /// <returns>Возвращает выписку по счетам с кодом 200 OK, внутри MbResult.</returns>
+    ///     /// <remarks>
+    /// Пример запроса:
+    ///
+    ///     GET /api/Accounts/GetAccountStatement/{ownerId}?accountId={accountId}&amp;startDate=2025-01-01&amp;endDate=2025-06-30
+    /// </remarks>
     [HttpGet("{ownerId:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MbResult<MultiAccountStatementDto>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<string>))]

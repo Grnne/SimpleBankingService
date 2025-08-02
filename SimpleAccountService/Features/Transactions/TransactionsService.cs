@@ -18,7 +18,7 @@ public class TransactionsService : ITransactionService
         if (!string.Equals(account.Currency, transactionCurrency, StringComparison.OrdinalIgnoreCase))
         {
             throw new ConflictException(
-                $"Валюта транзакции ({transactionCurrency}) не совпадает с валютой счета ({account.Currency}).");
+                $"Валюта транзакции ({transactionCurrency}) не совпадает с валютой ({account.Currency}) счета ({account.Id}).");
         }
 
         if (type == TransactionType.Debit && account.Balance < amount)
