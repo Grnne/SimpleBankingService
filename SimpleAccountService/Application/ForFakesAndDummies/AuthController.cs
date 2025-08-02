@@ -17,6 +17,10 @@ public class AuthController(IHttpClientFactory httpClientFactory) : ControllerBa
     /// Эту строку нужно вставить в поле для авторизации сверху справа под кнопкой Authorize и нажать Authorize
     /// Потом пользоваться остальными эндпоинтами
     /// </remarks>
+    ///
+    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(typeof(string), 400)]
+    [ProducesResponseType(typeof(string), 500)]
     [HttpPost("token")]
     public async Task<IActionResult> GetToken()
     {

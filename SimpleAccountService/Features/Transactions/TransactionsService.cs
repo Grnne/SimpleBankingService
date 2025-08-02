@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Simple_Account_Service.Application.Exceptions;
+using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Entities;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
@@ -15,7 +16,7 @@ public class TransactionsService(ITransactionRepository transactionRepository, I
 {
     //Пока нет нормальной бд часть бд логики в сервисах.
 
-    public async Task<TransactionDto> CreateTransactionAsync(Guid accountId, CreateTransactionDto createTransactionDto)
+    public async Task<MbResult<TransactionDto>> CreateTransactionAsync(Guid accountId, CreateTransactionDto createTransactionDto)
     {
         var account = await accountRepository.GetByIdAsync(accountId);
         CheckAccount(accountId, account, createTransactionDto.Type, createTransactionDto.Amount, createTransactionDto.Currency);
@@ -41,10 +42,10 @@ public class TransactionsService(ITransactionRepository transactionRepository, I
         }
         await accountRepository.UpdateAsync(account);
 
-        return mapper.Map<TransactionDto>(result);
+        return new MbResult<TransactionDto>(mapper.Map<TransactionDto>(result));
     }
 
-    public async Task<List<TransactionDto>> TransferBetweenAccounts(Guid accountId, TransferDto transferDto)
+    public async Task<MbResult<List<TransactionDto>>> TransferBetweenAccounts(Guid accountId, TransferDto transferDto)
     {
         var sourceAccount = await accountRepository.GetByIdAsync(accountId);
         CheckAccount(accountId, sourceAccount, transferDto.Type, transferDto.Amount, transferDto.Currency);
@@ -82,12 +83,14 @@ public class TransactionsService(ITransactionRepository transactionRepository, I
         await transactionRepository.CreateAsync(destinationTransaction);
         await accountRepository.UpdateAsync(sourceAccount);
         await accountRepository.UpdateAsync(destinationAccount);
-
+        
+        // Легкочитаемый кортеж с тернарником для изменения баланса у исходного и корреспондентского счетов
         (sourceAccount.Balance, destinationAccount.Balance) = sourceTransaction.Type == TransactionType.Debit
             ? (sourceAccount.Balance - sourceTransaction.Amount, destinationAccount.Balance + sourceTransaction.Amount)
             : (sourceAccount.Balance + sourceTransaction.Amount, destinationAccount.Balance - sourceTransaction.Amount);
 
-        return [mapper.Map<TransactionDto>(sourceTransaction), mapper.Map<TransactionDto>(destinationTransaction)];
+        return new MbResult<List<TransactionDto>>(
+            [mapper.Map<TransactionDto>(sourceTransaction), mapper.Map<TransactionDto>(destinationTransaction)]);
     }
 
     private static void CheckAccount(Guid accountId, [NotNull] Account? account, TransactionType type, decimal amount, string transactionCurrency)

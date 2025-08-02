@@ -138,7 +138,7 @@ public class Program
             c.RoutePrefix = "swagger";
         });
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 
         app.UseAuthentication();
         app.UseAuthorization();

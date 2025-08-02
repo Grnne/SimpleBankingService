@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
@@ -22,11 +23,11 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     /// <list type="bullet">
     /// <item><description>Amount — сумма транзакции (decimal).</description></item>
     /// <item><description>Currency — валюта (ISO 4217), например "USD", "EUR".</description></item>
-    /// <item><description>Type — тип транзакции, 0 для Credit и 1 для Debit .</description></item>
+    /// <item><description>Type — тип транзакции, 0 для Credit и 1 для Debit.</description></item>
     /// <item><description>Description — описание/комментарий (string, nullable).</description></item>
     /// </list>
     /// </param>
-    /// <returns>Возвращает созданную транзакцию с HTTP статусом 201 Created.</returns>
+    /// <returns>Возвращает результат операции, упакованный в MbResult, содержащий созданную транзакцию. При успехе HTTP статус 201 Created.</returns>
     /// <remarks>
     /// Пример запроса:
     /// 
@@ -38,10 +39,10 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     ///         "description": "Payment for invoice #123"
     ///     }
     /// </remarks>
-    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(TransactionDto))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MbResult<TransactionDto>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<TransactionDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<TransactionDto>))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<TransactionDto>))]
     [HttpPost]
     public async Task<IActionResult> CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
@@ -63,7 +64,7 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     /// <item><description>Description — описание перевода (string, nullable).</description></item>
     /// </list>
     /// </param>
-    /// <returns>Возвращает результат операции с HTTP статусом 200 OK.</returns>
+    /// <returns>Возвращает результат операции, упакованный в MbResult, содержащий список транзакций. При успехе HTTP статус 200 OK.</returns>
     /// <remarks>
     /// Пример запроса:
     /// 
@@ -75,10 +76,10 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     ///         "description": "Transfer to savings"
     ///     }
     /// </remarks>
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TransactionDto>))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MbResult<List<TransactionDto>>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<List<TransactionDto>>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<List<TransactionDto>>))]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<List<TransactionDto>>))]
     [HttpPost]
     public async Task<IActionResult> TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto transferDto)
     {

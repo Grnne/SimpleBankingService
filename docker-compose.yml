@@ -3,14 +3,14 @@
     image: ${DOCKER_REGISTRY-}simpleaccountservice
     ports:
       - "80:80"
-      - "443:443"
+      # - "443:443"
     build:
       context: .
       dockerfile: SimpleAccountService/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 80
-      ASPNETCORE_HTTPS_PORTS: 443
+      # ASPNETCORE_HTTPS_PORTS: 443
       KEYCLOAK_URL: "http://keycloak:8080"
       KEYCLOAK_REALM: "my_realm"
       KEYCLOAK_CLIENT_ID: "my_client"
