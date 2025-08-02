@@ -17,7 +17,7 @@ using System.Reflection;
 
 namespace Simple_Account_Service;
 
-//TODO https certificates self-signed or let's encrypt
+//TODO https certificates self-signed or let's encrypt, some tests
 
 public class Program
 {

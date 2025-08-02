@@ -8,7 +8,6 @@ using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 using Simple_Account_Service.Features.Transactions.Entities;
-using Xunit;
 
 namespace SimpleAccountService.Tests.AutoMapper;
 
