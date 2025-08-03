@@ -40,7 +40,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     {
         var response = await mediator.Send(new CreateAccountCommand(createAccountDto));
 
-        return Created(string.Empty, response); // assuming response is MbResult<AccountDto>
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     /// <summary>
