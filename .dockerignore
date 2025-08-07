@@ -1,4 +1,4 @@
-**/.classpath
+﻿**/.classpath
 **/.dockerignore
 **/.env
 **/.git
@@ -21,6 +21,7 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+**/.containers
 LICENSE
 README.md
 !**/.gitignore
