@@ -14,10 +14,13 @@ using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Net;
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
+using Simple_Account_Service.Features.Accounts.Entities;
+using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service;
 
-//TODO https certificates self-signed or let's encrypt, some tests
+//TODO https certificates self-signed or let's encrypt, some tests; uuid7 maybe
 
 public class Program
 {
@@ -124,14 +127,38 @@ public class Program
             }});
         });
 
+        builder.Services.AddDbContext<SasDbContext>(options =>
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
+                o =>
+                {
+                    o.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+                    o.MapEnum<TransactionType>();
+                    o.MapEnum<AccountType>();
+                }
+            ));
+
         //For dummy keycloak token request
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
+
+            var fakeDb = scope.ServiceProvider.GetRequiredService<FakeDb>();
+
+            context.Database.EnsureDeleted();
+            context.Database.EnsureCreated();
+
+            DataSeeder.SeedFakeData(context, fakeDb);
+        }
+
         //Refactor for build\dev
-        //app.UseDeveloperExceptionPage(); 
-        app.UseExceptionHandler();
+        app.UseDeveloperExceptionPage(); 
+        //app.UseExceptionHandler();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {

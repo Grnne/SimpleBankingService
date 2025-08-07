@@ -4,26 +4,42 @@ using Simple_Account_Service.Infrastructure.Data;
 
 namespace Simple_Account_Service.Infrastructure.Repositories;
 
-public class TransactionRepository(FakeDb db) : ITransactionRepository
+public class TransactionRepository(SasDbContext context) : ITransactionRepository
+
 {
     public async Task<Transaction?> GetByIdAsync(Guid accountId)
     {
-        return await db.GetTransactionByIdAsync(accountId);
+        return await context.Transactions.FindAsync(accountId);
     }
 
     public async Task<Transaction> CreateAsync(Transaction entity)
     {
-        return await db.AddTransactionAsync(entity);
+         await context.Transactions.AddAsync(entity);
+         await context.SaveChangesAsync();
+
+         return entity;
     }
 
     public async Task<Transaction> UpdateAsync(Transaction entity)
     {
-        await db.UpdateTransactionAsync(entity);
+        context.Transactions.Update(entity);
+        await context.SaveChangesAsync();
+
         return entity;
     }
 
-    public async Task<bool> DeleteAsync(Guid accountId)
+    public async Task<bool> DeleteAsync(Guid transactionId)
     {
-        return await db.RemoveTransactionAsync(accountId);
+        var entity = await context.Transactions.FindAsync(transactionId);
+        
+        if (entity == null)
+        {
+            return false;
+        }
+
+        context.Transactions.Remove(entity);
+        await context.SaveChangesAsync();
+
+        return true;
     }
 }

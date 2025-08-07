@@ -2,3 +2,5 @@
 
 init branch
 
+DateTime.UtcNow; + HasColumnType("timestamptz").HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+

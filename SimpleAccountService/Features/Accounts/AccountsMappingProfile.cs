@@ -13,7 +13,9 @@ public class AccountsMappingProfile : Profile
 {
     public AccountsMappingProfile()
     {
-        CreateMap<Account, AccountDto>();
+        CreateMap<Account, AccountDto>()
+            .ForMember(dest => dest.Transactions, opt =>
+                opt.MapFrom(src => src.Transactions));
 
         CreateMap<UpdateAccountDto, Account>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())

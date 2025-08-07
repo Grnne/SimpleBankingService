@@ -1,5 +1,4 @@
 ﻿using Simple_Account_Service.Application.ForFakesAndDummies;
-using Simple_Account_Service.Infrastructure.Data;
 
 namespace Simple_Account_Service.Infrastructure.Repositories;
 

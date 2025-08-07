@@ -1,30 +1,34 @@
-﻿using Simple_Account_Service.Features.Accounts.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Simple_Account_Service.Features.Accounts.Entities;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 
 namespace Simple_Account_Service.Infrastructure.Repositories;
 
-public class AccountRepository(FakeDb db) : IAccountRepository
+public class AccountRepository(SasDbContext context) : IAccountRepository
 {
     public async Task<Account> CreateAsync(Account entity)
     {
-        await db.AddAccountAsync(entity);
+        await context.Accounts.AddAsync(entity);
+        await context.SaveChangesAsync();
 
         return entity;
     }
 
     public async Task<Account?> GetByIdAsync(Guid accountId)
     {
-        var existing = await db.GetAccountByIdAsync(accountId);
-
-        return existing;
+        return await context.Accounts
+            .Include(a=> a.Transactions)
+            .FirstOrDefaultAsync(a => a.Id == accountId);
     }
 
     public async Task<Account> UpdateAsync(Account entity)
     {
-        var updated = await db.UpdateAccountAsync(entity);
+        context.Accounts.Update(entity);
 
-        if (!updated)
+        var result = await context.SaveChangesAsync();
+
+        if (result == 0)
         {
             throw new InvalidOperationException("Ошибка обновления счета на уровне базы данных. О как!");
         }
@@ -34,11 +38,24 @@ public class AccountRepository(FakeDb db) : IAccountRepository
 
     public async Task<bool> DeleteAsync(Guid accountId)
     {
-        return await db.RemoveAccountAsync(accountId);
+        var entity = await context.Accounts.FindAsync(accountId);
+
+        if (entity == null)
+        {
+            return false;
+        }
+
+        context.Accounts.Remove(entity);
+
+        await context.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<IEnumerable<Account>> GetAllAccountsAsync()
     {
-        return await db.GetAllAccountsAsync();
+        return await context.Accounts
+            .Include(a => a.Transactions)
+            .ToListAsync();
     }
 }

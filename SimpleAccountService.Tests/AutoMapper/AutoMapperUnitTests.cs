@@ -13,7 +13,7 @@ namespace SimpleAccountService.Tests.AutoMapper;
 
 public class AutoMapperUnitTests
 {
-    private readonly IConfigurationProvider _configuration;
+    private readonly MapperConfiguration _configuration;
     private readonly IMapper _mapper;
 
     public AutoMapperUnitTests()

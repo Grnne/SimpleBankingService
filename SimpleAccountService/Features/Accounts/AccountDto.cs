@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Simple_Account_Service.Features.Accounts.Entities;
+using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service.Features.Accounts;
@@ -31,5 +32,5 @@ public class AccountDto
     public DateTime? ClosedAt { get; set; }
 
     [UsedImplicitly]
-    public List<Transaction> Transactions { get; set; } = [];
+    public List<TransactionDto> Transactions { get; set; } = [];
 }
