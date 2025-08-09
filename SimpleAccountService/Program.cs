@@ -136,6 +136,7 @@ public class Program
                     o.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
                     o.MapEnum<TransactionType>();
                     o.MapEnum<AccountType>();
+                    o.EnableRetryOnFailure();
                 }
             ));
 
@@ -147,17 +148,28 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
-
             var fakeDb = scope.ServiceProvider.GetRequiredService<FakeDb>();
 
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
+            //TODO вопрос задать
+            // Я вижу в аутпут при миграции и удалении Exception thrown: 'System.Net.Sockets.SocketException' in System.Net.Sockets.dll
+            // она не влияет на работу приложения, но я не могу её отловить
+
+            try
+            {
+                Console.WriteLine("init migration");
+                context.Database.EnsureDeleted();
+                context.Database.Migrate();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("wtf" + e);
+            }
 
             DataSeeder.SeedFakeData(context, fakeDb);
         }
 
         //Refactor for build\dev
-        app.UseDeveloperExceptionPage(); 
+        app.UseDeveloperExceptionPage();
         //app.UseExceptionHandler();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
