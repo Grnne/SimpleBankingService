@@ -63,7 +63,7 @@ public static class DataSeeder
                 OwnerId = owners[1].Id,
                 Type = AccountType.Credit,
                 Currency = "RUB",
-                Balance = -2000.00m,
+                Balance = 2000.00m,
                 InterestRate = 0.07m,
                 CreatedAt = DateTime.UtcNow.AddMonths(-1),
                 ClosedAt = null,

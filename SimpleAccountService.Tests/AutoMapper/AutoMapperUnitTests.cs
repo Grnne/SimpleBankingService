@@ -180,7 +180,7 @@ public class AutoMapperUnitTests
         Assert.Null(account.ClosedAt);
         Assert.NotNull(account.Transactions);
         Assert.Empty(account.Transactions);
-        Assert.Equal(0, account.Balance); 
+        Assert.Equal(0, account.Balance);
 
         Assert.Equal(createDto.OwnerId, account.OwnerId);
         Assert.Equal(createDto.Type, account.Type);

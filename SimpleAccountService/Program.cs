@@ -133,10 +133,8 @@ public class Program
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
                 o =>
                 {
-                    o.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
                     o.MapEnum<TransactionType>();
                     o.MapEnum<AccountType>();
-                    o.EnableRetryOnFailure();
                 }
             ));
 
@@ -169,8 +167,8 @@ public class Program
         }
 
         //Refactor for build\dev
-        app.UseDeveloperExceptionPage();
-        //app.UseExceptionHandler();
+        //app.UseDeveloperExceptionPage();
+        app.UseExceptionHandler();
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
