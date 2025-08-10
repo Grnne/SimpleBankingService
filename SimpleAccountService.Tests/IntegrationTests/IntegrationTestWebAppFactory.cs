@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -10,6 +8,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Simple_Account_Service;
 using Simple_Account_Service.Infrastructure.Data;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using JetBrains.Annotations;
 using Testcontainers.PostgreSql;
 
 namespace SimpleAccountService.Tests.IntegrationTests;
@@ -36,10 +37,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             }
 
             services.AddDbContext<SasDbContext>(options => options.UseNpgsql(_postgresContainer.GetConnectionString()));
-
+            
             services.AddAuthentication("TestScheme")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                    "TestScheme", options => { });
+                    "TestScheme", ([UsedImplicitly] options) => { });
 
             services.AddAuthorization();
         });
@@ -53,6 +54,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     public new async ValueTask DisposeAsync()
     {
         await _postgresContainer.StopAsync();
+
+        GC.SuppressFinalize(this);
     }
 }
 

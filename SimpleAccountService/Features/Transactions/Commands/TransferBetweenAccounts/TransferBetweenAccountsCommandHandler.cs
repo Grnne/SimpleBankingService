@@ -1,9 +1,7 @@
-﻿using System.Data;
-using AutoMapper;
+﻿using AutoMapper;
 using JetBrains.Annotations;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
@@ -11,6 +9,7 @@ using Simple_Account_Service.Features.Transactions.Entities;
 using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
+using System.Data;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 

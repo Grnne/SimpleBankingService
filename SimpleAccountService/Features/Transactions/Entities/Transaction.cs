@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using Simple_Account_Service.Features.Accounts.Entities;
+﻿using Simple_Account_Service.Features.Accounts.Entities;
+using System.Text.Json.Serialization;
 
 namespace Simple_Account_Service.Features.Transactions.Entities;
 

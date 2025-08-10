@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Simple_Account_Service.Features.Accounts.Entities;
 using Simple_Account_Service.Features.Transactions.Entities;
 

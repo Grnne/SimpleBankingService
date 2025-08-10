@@ -14,10 +14,10 @@ public class TransactionRepository(SasDbContext context) : ITransactionRepositor
 
     public async Task<Transaction> CreateAsync(Transaction entity)
     {
-         await context.Transactions.AddAsync(entity);
-         await context.SaveChangesAsync();
+        await context.Transactions.AddAsync(entity);
+        await context.SaveChangesAsync();
 
-         return entity;
+        return entity;
     }
 
     public async Task<Transaction> UpdateAsync(Transaction entity)
@@ -31,7 +31,7 @@ public class TransactionRepository(SasDbContext context) : ITransactionRepositor
     public async Task<bool> DeleteAsync(Guid transactionId)
     {
         var entity = await context.Transactions.FindAsync(transactionId);
-        
+
         if (entity == null)
         {
             return false;

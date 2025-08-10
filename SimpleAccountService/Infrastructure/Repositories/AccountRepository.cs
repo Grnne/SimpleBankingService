@@ -18,7 +18,7 @@ public class AccountRepository(SasDbContext context) : IAccountRepository
     public async Task<Account?> GetByIdAsync(Guid accountId)
     {
         return await context.Accounts
-            .Include(a=> a.Transactions)
+            .Include(a => a.Transactions)
             .FirstOrDefaultAsync(a => a.Id == accountId);
     }
 
@@ -56,6 +56,14 @@ public class AccountRepository(SasDbContext context) : IAccountRepository
     {
         return await context.Accounts
             .Include(a => a.Transactions)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Account>> GetAccountsEagerlyUpToEndDateByOwnerAsync(Guid ownerId, DateTime endDate)
+    {
+        return await context.Accounts
+            .Where(a => a.OwnerId == ownerId && a.CreatedAt <= endDate)
+            .Include(a => a.Transactions.Where(t => t.Timestamp <= endDate))
             .ToListAsync();
     }
 }

@@ -25,6 +25,8 @@ public class AccountsMappingProfile : Profile
             .ForMember(dest => dest.Balance, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.Transactions, opt => opt.Ignore())
+            .ForMember(dest => dest.LastInterestAccrualAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Version, opt => opt.Ignore())
             .ForAllMembers(opt => opt.Condition(
                 srcMember => srcMember != null));
 
@@ -34,6 +36,8 @@ public class AccountsMappingProfile : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.ClosedAt, opt => opt.Ignore())
             .ForMember(dest => dest.Transactions, opt => opt.Ignore())
+            .ForMember(dest => dest.LastInterestAccrualAt, opt => opt.Ignore())
+            .ForMember(dest => dest.Version, opt => opt.Ignore())
             .ForAllMembers(opt => opt.Condition(srcMember => srcMember != null));
 
         CreateMap<Transaction, TransactionForStatementDto>();

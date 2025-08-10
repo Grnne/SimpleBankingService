@@ -29,6 +29,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <item><description>Type — тип счета: Checking, Deposit, Credit.</description></item>
     /// <item><description>Currency — валюта счета в формате ISO 4217, например "USD", "EUR".</description></item>
     /// <item><description>InterestRate — процентная ставка (опционально).</description></item>
+    /// <item><description>CreditLimit — новый кредитный лимит (опционально).</description></item>
     /// </list>
     /// </param>
     /// <returns>Возвращает созданный счет с кодом 201 Created, внутри MbResult.</returns>
@@ -50,6 +51,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <param name="updatedAccountDto">Данные для обновления счета. Поля необязательны:
     /// <list type="bullet">
     /// <item><description>InterestRate — новая процентная ставка (опционально).</description></item>
+    /// <item><description>CreditLimit — новый кредитный лимит (опционально).</description></item>
     /// <item><description>ClosedAt — дата закрытия счета (опционально).</description></item>
     /// </list>
     /// </param>

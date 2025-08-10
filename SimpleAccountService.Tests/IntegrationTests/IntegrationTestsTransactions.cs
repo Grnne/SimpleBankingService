@@ -5,9 +5,11 @@ using Simple_Account_Service.Features.Transactions.Entities;
 using Simple_Account_Service.Infrastructure.Data;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using JetBrains.Annotations;
 
 namespace SimpleAccountService.Tests.IntegrationTests;
 
+[UsedImplicitly]
 public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFactory>, IDisposable
 {
     private readonly HttpClient _client;
@@ -20,12 +22,15 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("TestScheme");
         _scope = factory.Services.CreateScope();
         _context = _scope.ServiceProvider.GetRequiredService<SasDbContext>();
+
         CleanDatabase();
     }
 
     public void Dispose()
     {
         _scope.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     private void CleanDatabase()
@@ -36,10 +41,11 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
     }
 
     [Fact]
+    [UsedImplicitly]
     public async Task ParallelTransferBetweenAccounts_50ValidCommands_CorrectBalances()
     {
         // Arrange
-        const int count = 10;
+        const int count = 50;
         const decimal amount = 1000m;
 
         var sourceAccount = new Account
@@ -64,7 +70,7 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
 
         _context.Accounts.Add(sourceAccount);
         _context.Accounts.Add(destinationAccount);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var transferDto = new TransferDto
         {
@@ -74,8 +80,6 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
             Type = TransactionType.Debit,
             Description = "Test parallel transfer"
         };
-
-        var requestContent = JsonContent.Create(transferDto);
 
         // Act
         var tasks = Enumerable.Range(0, count).Select(_ =>
@@ -87,7 +91,7 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
         // Обновил кеш EF core
         _context.ChangeTracker.Clear();
 
-        var updatedSource = await _context.Accounts.FindAsync(sourceAccount.Id);
+        var updatedSource =  await _context.Accounts.FindAsync(sourceAccount.Id);
         var updatedDestination = await _context.Accounts.FindAsync(destinationAccount.Id);
 
         // Assert

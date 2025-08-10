@@ -12,89 +12,43 @@ using Simple_Account_Service.Features.Transactions.Entities;
 namespace Simple_Account_Service.Features.Accounts.Queries.GetAccountStatement;
 
 [UsedImplicitly]
-public class GetAccountStatementQueryHandler(IAccountRepository repository, IMapper mapper) : IRequestHandler<GetAccountStatementQuery, MbResult<MultiAccountStatementDto>>
+public class GetAccountStatementQueryHandler(IAccountRepository repository, IMapper mapper)
+    : IRequestHandler<GetAccountStatementQuery, MbResult<MultiAccountStatementDto>>
 {
     public async Task<MbResult<MultiAccountStatementDto>> Handle(GetAccountStatementQuery request, CancellationToken cancellationToken)
     {
-        var accounts = await repository.GetAllAccountsAsync();
 
+        // Хочется сделать проекции в репозитории, возможно стоит отрефакторить, но имеет ли вообще это смысл,
+        // учитывая что надо делать промежуточные балансы по месяцам, например
         var ownerId = request.OwnerId;
         var startDate = request.StartDate;
         var endDate = request.EndDate;
         var accountId = request.AccountId;
 
-        var filteredOwnerAccounts = accounts.Where(a => a.OwnerId == ownerId).ToList();
+        var filteredAccounts = (await repository.GetAccountsEagerlyUpToEndDateByOwnerAsync(ownerId, endDate))
+            .ToList();
 
-        if (filteredOwnerAccounts.Count == 0)
-        {
-            throw new NotFoundException($"Счета владельца с id {ownerId} не найдены.");
-        }
+        filteredAccounts = FilterAndValidateAccounts(filteredAccounts, ownerId, startDate, endDate, accountId);
 
-        var balancesDict = new Dictionary<Guid, (decimal startBalance, decimal endBalance)>();
+        var balancesDict = GetStartEndBalances(filteredAccounts, startDate, endDate);
 
-        foreach (var account in filteredOwnerAccounts)
-        {
-            var startBalance = account.Transactions
-                .Where(t => t.Timestamp < startDate)
-                .Sum(t => t.Type == TransactionType.Credit ? t.Amount : -t.Amount);
-
-            var endBalance = account.Transactions
-                .Where(t => t.Timestamp <= endDate)
-                .Sum(t => t.Type == TransactionType.Credit ? t.Amount : -t.Amount);
-
-            balancesDict.Add(account.Id, (startBalance, endBalance));
-        }
-
-        if (accountId != null)
-        {
-            var existing = await repository.GetByIdAsync(accountId.Value);
-
-            if (existing == null)
+        var accountsStatements = filteredAccounts.Select(account =>
             {
-                throw new NotFoundException($"В данном периоде не найден счет с {accountId}.");
-            }
+                var filteredTransactions = account.Transactions
+                    .Where(t => t.Timestamp >= startDate && t.Timestamp <= endDate)
+                    .ToList();
 
-            if (existing.OwnerId != ownerId)
-            {
-                throw new ValidationException($"Счет с id {accountId} не принадлежит владельцу с id {ownerId}.");
-            }
-
-            var filteredAccounts = FilterAccountsByPeriod([existing], startDate, endDate);
-
-            if (filteredAccounts.Count == 0)
-            {
-                throw new NotFoundException($"В данном периоде не найден счет с {accountId}.");
-            }
-
-            filteredOwnerAccounts = filteredAccounts;
-        }
-        else
-        {
-            filteredOwnerAccounts = FilterAccountsByPeriod(filteredOwnerAccounts, startDate, endDate);
-
-            if (filteredOwnerAccounts.Count == 0)
-            {
-                throw new NotFoundException($"Счета владельца с id {ownerId} не найдены в заданном периоде.");
-            }
-        }
-
-        var accountsStatements = filteredOwnerAccounts.Select(account =>
-        {
-            var filteredTransactions = account.Transactions
-                .Where(t => t.Timestamp >= startDate && t.Timestamp <= endDate)
-                .ToList();
-
-            return new AccountStatementDto
-            {
-                Id = account.Id,
-                Type = account.Type,
-                Currency = account.Currency,
-                StartingBalance = balancesDict[account.Id].startBalance,
-                EndingBalance = balancesDict[account.Id].endBalance,
-                InterestRate = account.InterestRate,
-                Transactions = mapper.Map<List<TransactionForStatementDto>>(filteredTransactions)
-            };
-        })
+                return new AccountStatementDto
+                {
+                    Id = account.Id,
+                    Type = account.Type,
+                    Currency = account.Currency,
+                    StartingBalance = balancesDict[account.Id].startBalance,
+                    EndingBalance = balancesDict[account.Id].endBalance,
+                    InterestRate = account.InterestRate,
+                    Transactions = mapper.Map<List<TransactionForStatementDto>>(filteredTransactions)
+                };
+            })
             .ToList();
 
         var multiAccountStatement = new MultiAccountStatementDto
@@ -110,12 +64,83 @@ public class GetAccountStatementQueryHandler(IAccountRepository repository, IMap
         return new MbResult<MultiAccountStatementDto>(multiAccountStatement);
     }
 
-    // Хотел разбить по дяде Бобу все на методы поменьше, но т.к. все равно надо переделывать, оставил так
     private static List<Account> FilterAccountsByPeriod(List<Account> accounts, DateTime startDate, DateTime endDate)
     {
         var result = accounts
-            .Where(a => a.CreatedAt <= endDate && (a.ClosedAt == null || a.ClosedAt >= startDate)).ToList();
+            .Where(a => a.CreatedAt <= endDate && (a.ClosedAt == null || a.ClosedAt >= startDate))
+            .ToList();
 
         return result;
+    }
+
+    private static Dictionary<Guid, (decimal startBalance, decimal endBalance)> GetStartEndBalances(
+        List<Account> accounts,
+        DateTime startDate,
+        DateTime endDate)
+    {
+        var balancesDict = new Dictionary<Guid, (decimal startBalance, decimal endBalance)>();
+
+        foreach (var account in accounts)
+        {
+            var startBalance = account.Transactions
+                .Where(t => t.Timestamp < startDate)
+                .Sum(t => t.Type == TransactionType.Credit ? t.Amount : -t.Amount);
+
+            var endBalance = account.Transactions
+                .Where(t => t.Timestamp <= endDate)
+                .Sum(t => t.Type == TransactionType.Credit ? t.Amount : -t.Amount);
+
+            balancesDict.Add(account.Id, (startBalance, endBalance));
+        }
+
+        return balancesDict;
+    }
+
+    private static List<Account> FilterAndValidateAccounts(
+        List<Account> accounts,
+        Guid ownerId,
+        DateTime startDate,
+        DateTime endDate,
+        Guid? accountId = null)
+    {
+        if (accounts == null || accounts.Count == 0)
+        {
+            throw new NotFoundException($"Счета владельца с id {ownerId} в данном периоде не найдены.");
+        }
+
+        if (accountId != null)
+        {
+            var existing = accounts.Find(a => a.Id == accountId);
+
+            if (existing == null)
+            {
+                throw new NotFoundException($"В данном периоде не найден счет с {accountId}.");
+            }
+
+            if (existing.OwnerId != ownerId)
+            {
+                throw new ValidationException($"Счет с id {accountId} не принадлежит владельцу с id {ownerId}.");
+            }
+
+            var filtered = FilterAccountsByPeriod([existing], startDate, endDate);
+
+            if (filtered.Count == 0)
+            {
+                throw new NotFoundException($"В данном периоде не найден счет с {accountId}.");
+            }
+
+            return filtered;
+        }
+        else
+        {
+            var filtered = FilterAccountsByPeriod(accounts, startDate, endDate);
+
+            if (filtered.Count == 0)
+            {
+                throw new NotFoundException($"Счета владельца с id {ownerId} не найдены в заданном периоде.");
+            }
+
+            return filtered;
+        }
     }
 }

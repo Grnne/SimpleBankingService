@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using MediatR;
 using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Application.Models;
+using Simple_Account_Service.Features.Accounts.Entities;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
@@ -34,9 +35,19 @@ public class UpdateAccountCommandHandler(IAccountRepository repository, IMapper 
             account.ClosedAt = request.Request.ClosedAt;
         }
 
+        if (account.Type != AccountType.Credit && request.Request.CreditLimit.HasValue)
+        {
+            throw new ConflictException("Кредитный лимит можно изменять только для кредитных счетов.");
+        }
+
         if (request.Request.InterestRate != null)
         {
             account.InterestRate = request.Request.InterestRate;
+        }
+
+        if (request.Request.CreditLimit != null)
+        {
+            account.CreditLimit = request.Request.CreditLimit;
         }
 
         var response = await repository.UpdateAsync(account);

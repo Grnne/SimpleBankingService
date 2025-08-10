@@ -1,12 +1,20 @@
 ﻿using FluentValidation;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Application.Models;
+using Simple_Account_Service.Features.Accounts;
+using Simple_Account_Service.Features.Accounts.Entities;
+using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions;
+using Simple_Account_Service.Features.Transactions.Entities;
 using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
@@ -14,13 +22,12 @@ using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Net;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using Simple_Account_Service.Features.Accounts.Entities;
-using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace Simple_Account_Service;
 
-//TODO https certificates self-signed or let's encrypt, some tests; uuid7 maybe
+//TODO https certificates self-signed or let's encrypt, some tests; uuid7 maybe 
+
+//Используйте NodaTime для более точного и надежного управления временем
 
 public class Program
 {
@@ -33,7 +40,9 @@ public class Program
             {
                 options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
             });
+
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
         builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
 
@@ -49,6 +58,7 @@ public class Program
                     ValidateAudience = true,
                     ValidateLifetime = true
                 };
+
                 options.Events = new JwtBearerEvents
                 {
                     OnChallenge = async context =>
@@ -74,7 +84,6 @@ public class Program
             cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
-
         builder.Services.AddProblemDetails();
 
         builder.Services.AddCors(options =>
@@ -95,8 +104,10 @@ public class Program
         builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
         builder.Services.AddScoped<IOwnerRepository, OwnerRepository>();
         builder.Services.AddScoped<ITransactionService, TransactionsService>();
+        builder.Services.AddScoped<IAccountsService, AccountsService>();
 
         builder.Services.AddEndpointsApiExplorer();
+
         builder.Services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Simple Account Service API", Version = "v1" });
@@ -138,8 +149,14 @@ public class Program
                 }
             ));
 
-        //For dummy keycloak token request
+        // For dummy Keycloak token request
         builder.Services.AddHttpClient();
+
+        builder.Services.AddHangfire(config =>
+            config.UsePostgreSqlStorage(options =>
+                options.UseNpgsqlConnection(builder.Configuration
+                    .GetConnectionString("DefaultConnection"))));
+        builder.Services.AddHangfireServer();
 
         var app = builder.Build();
 
@@ -148,27 +165,29 @@ public class Program
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
             var fakeDb = scope.ServiceProvider.GetRequiredService<FakeDb>();
 
-            //TODO вопрос задать
-            // Я вижу в аутпут при миграции и удалении Exception thrown: 'System.Net.Sockets.SocketException' in System.Net.Sockets.dll
-            // она не влияет на работу приложения, но я не могу её отловить
+            //TODO don't forget to ask questions
+            // I see in output during migration and deletion Exception thrown: 'System.Net.Sockets.SocketException' in System.Net.Sockets.dll
+            // It does not affect application operation, but I cannot catch it
 
             try
             {
                 Console.WriteLine("init migration");
-                context.Database.EnsureDeleted();
+                context.Database.EnsureDeleted(); // For dev purposes
                 context.Database.Migrate();
             }
             catch (Exception e)
             {
-                throw new Exception("wtf" + e);
+                Console.WriteLine("wtf" + e.Message);
+                throw;
             }
 
             DataSeeder.SeedFakeData(context, fakeDb);
         }
 
-        //Refactor for build\dev
-        //app.UseDeveloperExceptionPage();
+        // Refactor for build/dev
+        // app.UseDeveloperExceptionPage();
         app.UseExceptionHandler();
+
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
@@ -176,7 +195,7 @@ public class Program
             c.RoutePrefix = "swagger";
         });
 
-        //app.UseHttpsRedirection();
+        // app.UseHttpsRedirection();
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -191,6 +210,24 @@ public class Program
 
         app.MapControllers();
 
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = [new AllowAllDashboardAuthorizationFilter()]
+        });
+
+        RecurringJob.AddOrUpdate<IAccountsService>(
+            "DailyInterestAccrualJob",
+            service => service.AddDailyInterestAsync(),
+            Cron.Daily);
+
         app.Run();
+    }
+}
+
+public class AllowAllDashboardAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        return true;
     }
 }
