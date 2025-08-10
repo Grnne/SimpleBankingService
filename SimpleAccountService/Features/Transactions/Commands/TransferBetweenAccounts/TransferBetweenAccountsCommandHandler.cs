@@ -22,8 +22,6 @@ public class TransferBetweenAccountsCommandHandler(
     IMapper mapper)
     : IRequestHandler<TransferBetweenAccountsCommand, MbResult<List<TransactionDto>>>
 {
-
-
     public async Task<MbResult<List<TransactionDto>>> Handle(TransferBetweenAccountsCommand request,
         CancellationToken cancellationToken)
     {

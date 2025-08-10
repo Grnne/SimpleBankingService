@@ -91,8 +91,8 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
         // Обновил кеш EF core
         _context.ChangeTracker.Clear();
 
-        var updatedSource = await _context.Accounts.FindAsync(sourceAccount.Id);
-        var updatedDestination = await _context.Accounts.FindAsync(destinationAccount.Id);
+        var updatedSource = await _context.Accounts.FindAsync(sourceAccount.Id, TestContext.Current.CancellationToken);
+        var updatedDestination = await _context.Accounts.FindAsync(destinationAccount.Id, TestContext.Current.CancellationToken);
 
         // Assert
         // Насколько я понял, 1 трансфер должен быть успешным, остальные вернут ошибку

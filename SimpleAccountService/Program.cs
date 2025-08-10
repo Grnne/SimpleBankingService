@@ -189,8 +189,8 @@ public class Program
         }
 
         // Refactor for build/dev
-         app.UseDeveloperExceptionPage();
-        //app.UseExceptionHandler();
+        //app.UseDeveloperExceptionPage();
+        app.UseExceptionHandler();
 
         app.UseSwagger();
         app.UseSwaggerUI(c =>
