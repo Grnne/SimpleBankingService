@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using Simple_Account_Service.Features.Accounts.Entities;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 using Simple_Account_Service.Features.Transactions.Entities;
 using Simple_Account_Service.Infrastructure.Data;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using JetBrains.Annotations;
 
 namespace SimpleAccountService.Tests.IntegrationTests;
 
@@ -91,7 +91,7 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
         // Обновил кеш EF core
         _context.ChangeTracker.Clear();
 
-        var updatedSource =  await _context.Accounts.FindAsync(sourceAccount.Id);
+        var updatedSource = await _context.Accounts.FindAsync(sourceAccount.Id);
         var updatedDestination = await _context.Accounts.FindAsync(destinationAccount.Id);
 
         // Assert

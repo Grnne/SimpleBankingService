@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JetBrains.Annotations;
 using Simple_Account_Service.Features.Accounts;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
@@ -8,7 +9,6 @@ using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 using Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 using Simple_Account_Service.Features.Transactions.Entities;
-using JetBrains.Annotations;
 
 namespace SimpleAccountService.Tests.AutoMapper;
 

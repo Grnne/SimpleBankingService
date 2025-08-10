@@ -25,9 +25,12 @@ using System.Reflection;
 
 namespace Simple_Account_Service;
 
-//TODO https certificates self-signed or let's encrypt, some tests; uuid7 maybe 
+// TODO https certificates self-signed or let's encrypt, some more tests; read bout uuid7, ask questions below
 
-//Используйте NodaTime для более точного и надежного управления временем
+// Спросить про: NodaTime, транзакции, выписки(проекции и поле для промежуточного ежемесячного баланса
+// возможно), 2 запроса или обработка большего количества данных, про полотно в program или отдельные файлы
+// с конфигурацией, про concurrency в контексте банковских операций, про возврат 204 delete
+// вспомнить, что хотел спросить(критически важно 🤡)
 
 public class Program
 {
@@ -165,14 +168,15 @@ public class Program
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
             var fakeDb = scope.ServiceProvider.GetRequiredService<FakeDb>();
 
-            //TODO don't forget to ask questions
+            // TODO don't forget to ask questions
             // I see in output during migration and deletion Exception thrown: 'System.Net.Sockets.SocketException' in System.Net.Sockets.dll
             // It does not affect application operation, but I cannot catch it
 
             try
             {
                 Console.WriteLine("init migration");
-                context.Database.EnsureDeleted(); // For dev purposes
+                // For dev purposes
+                //context.Database.EnsureDeleted(); 
                 context.Database.Migrate();
             }
             catch (Exception e)
@@ -185,8 +189,8 @@ public class Program
         }
 
         // Refactor for build/dev
-        // app.UseDeveloperExceptionPage();
-        app.UseExceptionHandler();
+         app.UseDeveloperExceptionPage();
+        //app.UseExceptionHandler();
 
         app.UseSwagger();
         app.UseSwaggerUI(c =>
@@ -212,7 +216,10 @@ public class Program
 
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
-            Authorization = [new AllowAllDashboardAuthorizationFilter()]
+            Authorization = new List<IDashboardAuthorizationFilter>
+            {
+                new AllowAllDashboardAuthorizationFilter()
+            }
         });
 
         RecurringJob.AddOrUpdate<IAccountsService>(

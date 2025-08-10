@@ -12,10 +12,10 @@ public class AuthController(IHttpClientFactory httpClientFactory) : ControllerBa
     /// Заглушка, дергает access token из keycloak, в формате "Bearer {token}"
     /// </summary>
     /// <remarks>
-    /// Выполняет POST-запрос к токен-эндпоинту Keycloak с credentials первого пользователя в базе
-    /// Возвращает или ошибку если не прогрузился сервер авторизации, либо "Bearer {token}"
+    /// Выполняет POST-запрос к token-endpoint Keycloak с credentials первого пользователя в базе
+    /// возвращает или ошибку если не прогрузился сервер авторизации, либо "Bearer {token}"
     /// Эту строку нужно вставить в поле для авторизации сверху справа под кнопкой Authorize и нажать Authorize
-    /// Потом пользоваться остальными эндпоинтами
+    /// Потом пользоваться остальными endpoint
     /// </remarks>
     ///
     [ProducesResponseType(typeof(string), 200)]

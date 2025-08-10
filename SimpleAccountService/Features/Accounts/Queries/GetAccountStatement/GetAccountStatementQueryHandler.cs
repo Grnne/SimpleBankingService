@@ -18,7 +18,7 @@ public class GetAccountStatementQueryHandler(IAccountRepository repository, IMap
     public async Task<MbResult<MultiAccountStatementDto>> Handle(GetAccountStatementQuery request, CancellationToken cancellationToken)
     {
 
-        // Хочется сделать проекции в репозитории, возможно стоит отрефакторить, но имеет ли вообще это смысл,
+        // Хочется сделать проекции в репозитории, возможно стоит refactor, но имеет ли вообще это смысл,
         // учитывая что надо делать промежуточные балансы по месяцам, например
         var ownerId = request.OwnerId;
         var startDate = request.StartDate;

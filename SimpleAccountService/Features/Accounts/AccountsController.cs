@@ -28,7 +28,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <item><description>OwnerId — уникальный идентификатор владельца счета (Guid).</description></item>
     /// <item><description>Type — тип счета: Checking, Deposit, Credit.</description></item>
     /// <item><description>Currency — валюта счета в формате ISO 4217, например "USD", "EUR".</description></item>
-    /// <item><description>InterestRate — процентная ставка (опционально).</description></item>
+    /// <item><description>InterestRate — процентная ставка от 0 до 1 (0%–100%) (опционально).</description></item>
     /// <item><description>CreditLimit — новый кредитный лимит (опционально).</description></item>
     /// </list>
     /// </param>
@@ -50,7 +50,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <param name="accountId">Идентификатор счета для обновления (Guid).</param>
     /// <param name="updatedAccountDto">Данные для обновления счета. Поля необязательны:
     /// <list type="bullet">
-    /// <item><description>InterestRate — новая процентная ставка (опционально).</description></item>
+    /// <item><description>InterestRate — новая процентная ставка от 0 до 1 (0%–100%) (опционально).</description></item>
     /// <item><description>CreditLimit — новый кредитный лимит (опционально).</description></item>
     /// <item><description>ClosedAt — дата закрытия счета (опционально).</description></item>
     /// </list>
@@ -74,13 +74,13 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// <param name="accountId">Идентификатор удаляемого счета (Guid).</param>
     /// <returns>Возвращает код 204 No Content при успешном удалении или ошибку внутри MbResult.</returns>
     [HttpDelete("{accountId:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status204NoContent, Type = typeof(MbResult<bool>))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(MbResult<bool>))]
     public async Task<IActionResult> DeleteAccount(Guid accountId)
     {
-        await mediator.Send(new DeleteAccountCommand(accountId));
+        var response = await mediator.Send(new DeleteAccountCommand(accountId));
 
-        return NoContent();
+        return StatusCode(StatusCodes.Status204NoContent, response);
     }
 
     /// <summary>
