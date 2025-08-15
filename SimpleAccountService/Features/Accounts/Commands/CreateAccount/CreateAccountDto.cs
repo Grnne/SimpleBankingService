@@ -10,5 +10,7 @@ public class CreateAccountDto
 
     public string Currency { get; set; } = null!;
 
+    public decimal? CreditLimit { get; set; }
+
     public decimal? InterestRate { get; set; }
 }

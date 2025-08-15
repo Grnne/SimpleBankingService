@@ -21,9 +21,17 @@ public class TransactionsService : ITransactionService
                 $"Валюта транзакции ({transactionCurrency}) не совпадает с валютой ({account.Currency}) счета ({account.Id}).");
         }
 
-        if (type == TransactionType.Debit && account.Balance < amount)
+        switch (type)
         {
-            throw new ConflictException("Недостаточно средств для проведения списания.");
+            case TransactionType.Debit when account.Type != AccountType.Credit && account.Balance < amount:
+                throw new ConflictException("Недостаточно средств для проведения списания.");
+            case TransactionType.Debit when account.Type == AccountType.Credit && account.Balance + account.CreditLimit < amount:
+                throw new ConflictException("Недостаточно средств для проведения списания, кредитный лимит будет превышен.");
+            case TransactionType.Credit:
+            case TransactionType.Debit:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 }

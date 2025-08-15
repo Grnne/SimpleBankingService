@@ -3,7 +3,7 @@
     image: ${DOCKER_REGISTRY-}simpleaccountservice
     ports:
       - "80:80"
-      # - "443:443"
+    # - "443:443"
     build:
       context: .
       dockerfile: SimpleAccountService/Dockerfile
@@ -14,23 +14,54 @@
       KEYCLOAK_URL: "http://keycloak:8080"
       KEYCLOAK_REALM: "my_realm"
       KEYCLOAK_CLIENT_ID: "my_client"
+      ConnectionStrings__DefaultConnection: "Host=sas-db;Port=5432;Database=SASDb;User Id=postgres;Password=postgres;"
     depends_on:
-      - keycloak
-
+      sas-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+   
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2
     container_name: keycloak
     command:
-    - start-dev
-    - "-Dkeycloak.migration.action=import"
-    - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
-    - "-Dkeycloak.migration.provider=singleFile"
-    - "-Dkeycloak.migration.file=/opt/keycloak/data/import/my_realm-realm.json"
+      - start-dev
+      - "-Dkeycloak.migration.action=import"
+      - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+      - "-Dkeycloak.migration.provider=singleFile"
+      - "-Dkeycloak.migration.file=/opt/keycloak/data/import/my_realm-realm.json"
     ports:
       - "8080:8080"
+      - "9000:9000"
     environment:
-        KC_BOOTSTRAP_ADMIN_USERNAME: admin
-        KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-        KEYCLOAK_IMPORT_LOG_LEVEL: DEBUG
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KEYCLOAK_IMPORT_LOG_LEVEL: DEBUG
+      KC_HTTP_MANAGEMENT_PORT: 9000
+      KC_HEALTH_ENABLED: true
     volumes:
       - ./keycloak-config:/opt/keycloak/data/import:ro
+    healthcheck:
+        test: ["CMD-SHELL", "exec 3<> /dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nhost: http://localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; if [ $? -eq 0 ]; then echo 'Healthcheck Successful'; exit 0; else echo 'Healthcheck Failed'; exit 1; fi;"]
+        interval: 5s
+        timeout: 3s
+        retries: 10
+        start_period: 20s
+
+  sas-db:
+    image: postgres:latest
+    container_name: sas-db
+    environment:
+      POSTGRES_DB: SASDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./.containers/products-db:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
