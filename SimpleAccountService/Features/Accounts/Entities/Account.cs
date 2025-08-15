@@ -14,13 +14,19 @@ public class Account
 
     public decimal Balance { get; set; }
 
+    public decimal? CreditLimit { get; set; }
+
     public decimal? InterestRate { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime? LastInterestAccrualAt { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? ClosedAt { get; set; }
 
     public List<Transaction> Transactions { get; set; } = [];
+
+    public uint Version { get; set; }
 }
 
 public enum AccountType

@@ -15,7 +15,7 @@ public class DeleteAccountCommandHandler(IAccountRepository repository) : IReque
 
         if (account == null)
         {
-            throw new NotFoundException($"Счет с айди {request.AccountId} не найден.");
+            throw new NotFoundException($"Счет {request.AccountId} не найден.");
         }
 
         return new MbResult<bool>(await repository.DeleteAsync(request.AccountId));

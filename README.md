@@ -1,24 +1,89 @@
-﻿Салют, это резюме по заданию 2 на стажировке, сервис «Банковские счета»
+﻿Салют, это резюме по заданию 3 на стажировке, сервис «Банковские счета»
 
-Замечания поправил
+Замечаний прошлый раз небыло, а хотелось бы побольше критики
 
-1. Вернул удаленный случайно проект с тестами Маппера
+Сам проект лежит на http://localhost:80 или просто http://localhost , автоматически редиректит на /swagger, keycloak на http://localhost:8080
+hangfire на http://localhost/hangfire БД наружу на http://localhost:5433
 
-2. Сделал сериализацию в виде строковых значений и поправил xml доки
+Запускается или docker-compose up -d, или F5 в IDE, если выбрать docker-compose, билдится около минуты
+Тесты запускаются dotnet test .\SimpleAccountService.Tests\ либо в контекстном меню
 
-3. Ошибку подробнее оформил
+Аутентификация в swagger: пойти на эндпоинт Auth/GetToken, выполнить запрос, получить токен в формате "Bearer {token}", вставить токен в авторизацю сваггера(сверху справа) залогиниться и закрыть окно авторизации. Если неужно reseed базу, надо раскомментить //context.Database.EnsureDeleted(); в программ
 
-4. Сделал словарь валют, валидация идет по нему, возможно стоит с ним добавить эндпоинт
+Снизу ридми привел результат моего EXPLAIN ANALYZE, запрос и QUERY PLAN
 
+При дебаге 50 параллельных запросов в тесте окно дебаггера разрывало 10 минут, но вроде это нормально. Обычный прогон тестов работает в течении 6-10 секунд
+При параллельных запросах выполняется только 1, остальные бросают 409
 
-По заданию два все пункты сделал, в возвращаемых контролером ошибках поставил Type = typeof(MbResult<string>))], т.к. там все равно респонс будет null
+Крон джоб можно проверить по адресу http://localhost/hangfire где-то там в интерфейсе
 
-Аутентификация в swagger: пойти на эндпоинт Auth/GetToken, выполнить запрос, получить токен в формате "Bearer {token}", вставить токен в авторизацю сваггера(сверху справа) залогиниться и закрыть окно авторизации
+Забор данных для выписки в целом получился тупым, без проекции транзакций, но там в любом случае нужно делать периодические балансы счетов, баланс на начало месяца, может быть, каждый месяц, так что я решил уточнить как лучше потом
 
-Сам проект лежит на http://localhost:80 или просто http://localhost, автоматически редиректит на /swagger, keycloak на http://localhost:8080
+Модульные тесты сделал с sqlight и дурацкой перегрузкой version, мне не понравились, хочется просто поднять стенд тестировочный обычным докер композом, а не тестконтейнеры.
+UPD Надо бы переделать все тесты нормально, или хотя бы адекватно
 
-Запускается или docker-compose up -d, или f5 в IDE
+EXPLAIN ANALYZE
+SELECT a.id,
+       a.balance,
+       a.closed_at,
+       a.created_at,
+       a.credit_limit,
+       a.currency,
+       a.interest_rate,
+       a.last_interest_accrual_at,
+       a.owner_id,
+       a.type,
+       t0.id,
+       t0.account_id,
+       t0.amount,
+       t0.counterparty_account_id,
+       t0.currency,
+       t0.description,
+       t0.timestamp,
+       t0.type
+FROM accounts AS a
+LEFT JOIN (
+    SELECT t.id,
+           t.account_id,
+           t.amount,
+           t.counterparty_account_id,
+           t.currency,
+           t.description,
+           t.timestamp,
+           t.type
+    FROM transactions AS t
+    WHERE t.timestamp <= '2026-04-10T00:00:00Z'
+) AS t0 ON a.id = t0.account_id
+WHERE a.owner_id = '11111111-1111-1111-1111-111111111111'
+  AND a.created_at <= '2026-04-10T00:00:00Z'
+ORDER BY a.id;
 
-Так же удалил лишние файлы, перенес недублирующуюся логику из сервисов в хендлеры
+QUERY PLAN                                                                                                                                                       
 
-Хочу сделать сертификат и пустить на https всё, так что пока закоментил некоторые настройки для этого
+Sort  (cost=17.54..17.55 rows=1 width=752) (actual time=0.032..0.033 rows=3 loops=1)                                                                             
+
+  Sort Key: a.id                                                                                                                                                 
+
+  Sort Method: quicksort  Memory: 25kB                                                                                                                           
+
+  ->  Nested Loop Left Join  (cost=4.16..17.53 rows=1 width=752) (actual time=0.023..0.026 rows=3 loops=1)                                                       
+
+        ->  Bitmap Heap Scan on accounts a  (cost=4.02..9.36 rows=1 width=140) (actual time=0.013..0.014 rows=2 loops=1)                                         
+
+              Recheck Cond: (owner_id = '11111111-1111-1111-1111-111111111111'::uuid)                                                                            
+
+              Filter: (created_at <= '2026-04-10 07:00:00+07'::timestamp with time zone)                                                                         
+
+              Heap Blocks: exact=1                                                                                                                               
+
+              ->  Bitmap Index Scan on ix_accounts_owner_id  (cost=0.00..4.01 rows=2 width=0) (actual time=0.007..0.007 rows=2 loops=1)       
+                   
+                    Index Cond: (owner_id = '11111111-1111-1111-1111-111111111111'::uuid)     
+                                                                   
+        ->  Index Scan using ix_transactions_account_id_timestamp on transactions t  (cost=0.14..8.16 rows=1 width=612) (actual time=0.004..0.005 rows=2 loops=2)
+
+              Index Cond: ((account_id = a.id) AND ("timestamp" <= '2026-04-10 07:00:00+07'::timestamp with time zone))               
+                           
+Planning Time: 0.143 ms  
+                                                                                                                                        
+Execution Time: 0.090 ms                                                                                                                                         

@@ -12,9 +12,7 @@ public sealed class UpdateAccountCommandValidator : AbstractValidator<UpdateAcco
             .NotEmpty().WithMessage("Идентификатор аккаунта обязателен.");
 
         RuleFor(x => x.Request.InterestRate)
-            .GreaterThanOrEqualTo(0)
-            .When(x => x.Request.InterestRate.HasValue)
-            .WithMessage("Процентная ставка должна быть больше или равна 0.");
+            .InclusiveBetween(0m, 1m).WithMessage("Процентная ставка должна быть от 0 до 1 (0%–100%).");
 
         RuleFor(x => x.Request.ClosedAt)
             .LessThanOrEqualTo(DateTime.UtcNow)

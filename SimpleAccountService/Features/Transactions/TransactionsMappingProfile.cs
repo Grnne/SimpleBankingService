@@ -17,10 +17,14 @@ public class TransactionsMappingProfile : Profile
             .ForMember(dest => dest.CounterpartyAccountId, opt => opt.Ignore())
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.AccountId, opt => opt.Ignore())
+            .ForMember(dest => dest.Account, opt => opt.Ignore())
+            .ForMember(dest => dest.Version, opt => opt.Ignore())
             .ForMember(dest => dest.Timestamp, opt => opt.Ignore())
             .ForAllMembers(opt => opt.Condition(srcMember => srcMember != null));
 
         CreateMap<TransferDto, Transaction>()
+            .ForMember(dest => dest.Account, opt => opt.Ignore())
+            .ForMember(dest => dest.Version, opt => opt.Ignore())
             .ForMember(dest => dest.CounterpartyAccountId, opt => opt.MapFrom(src => src.DestinationAccountId))
             .ForMember(dest => dest.AccountId, opt => opt.Ignore())
             .ForMember(dest => dest.Timestamp, opt => opt.Ignore())

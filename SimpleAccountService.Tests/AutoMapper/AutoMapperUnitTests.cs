@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using JetBrains.Annotations;
 using Simple_Account_Service.Features.Accounts;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
@@ -11,9 +12,10 @@ using Simple_Account_Service.Features.Transactions.Entities;
 
 namespace SimpleAccountService.Tests.AutoMapper;
 
+[UsedImplicitly]
 public class AutoMapperUnitTests
 {
-    private readonly IConfigurationProvider _configuration;
+    private readonly MapperConfiguration _configuration;
     private readonly IMapper _mapper;
 
     public AutoMapperUnitTests()
@@ -28,6 +30,7 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void AutoMapper_Configuration_IsValid()
     {
         // Act & Assert
@@ -35,6 +38,7 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void Transaction_To_TransactionDto_ValidInput_ValidResult()
     {
         // Arrange
@@ -65,6 +69,7 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void CreateTransactionDto_To_Transaction_ValidInput_ValidResult()
     {
         // Arrange
@@ -75,6 +80,8 @@ public class AutoMapperUnitTests
             Type = TransactionType.Debit,
             Description = null
         };
+        var tolerance = TimeSpan.FromSeconds(5);
+        var currentTime = DateTime.UtcNow;
 
         // Act
         var transaction = _mapper.Map<Transaction>(createDto);
@@ -83,8 +90,7 @@ public class AutoMapperUnitTests
         Assert.Equal(default, transaction.Id);
         Assert.Equal(default, transaction.AccountId);
         Assert.Null(transaction.CounterpartyAccountId);
-        Assert.Equal(default, transaction.Timestamp);
-
+        Assert.InRange(transaction.Timestamp, currentTime.Add(-tolerance), currentTime.Add(tolerance));
         Assert.Equal(createDto.Amount, transaction.Amount);
         Assert.Equal(createDto.Currency, transaction.Currency);
         Assert.Equal(createDto.Type, transaction.Type);
@@ -92,6 +98,7 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void TransferDto_To_Transaction_ValidInput_ValidResult()
     {
         // Arrange
@@ -103,6 +110,9 @@ public class AutoMapperUnitTests
             Description = "Transfer description",
             DestinationAccountId = Guid.NewGuid()
         };
+        var tolerance = TimeSpan.FromSeconds(5);
+        var currentTime = DateTime.UtcNow;
+
 
         // Act
         var transaction = _mapper.Map<Transaction>(transferDto);
@@ -112,8 +122,7 @@ public class AutoMapperUnitTests
 
         Assert.Equal(default, transaction.Id);
         Assert.Equal(default, transaction.AccountId);
-        Assert.Equal(default, transaction.Timestamp);
-
+        Assert.InRange(transaction.Timestamp, currentTime.Add(-tolerance), currentTime.Add(tolerance));
         Assert.Equal(transferDto.Amount, transaction.Amount);
         Assert.Equal(transferDto.Currency, transaction.Currency);
         Assert.Equal(transferDto.Type, transaction.Type);
@@ -121,6 +130,7 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void Account_To_AccountDto_ValidInput_ValidResult()
     {
         // Arrange
@@ -160,6 +170,7 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void CreateAccountDto_To_Account_ValidInput_ValidResult()
     {
         // Arrange
@@ -170,18 +181,19 @@ public class AutoMapperUnitTests
             Currency = "EUR",
             InterestRate = 3.0m
         };
-
+        var tolerance = TimeSpan.FromSeconds(5);
+        var currentTime = DateTime.UtcNow;
         // Act
         var account = _mapper.Map<Account>(createDto);
 
         // Assert
         Assert.Equal(default, account.Id);
-        Assert.Equal(default, account.CreatedAt);
+        Assert.InRange(account.CreatedAt, currentTime.Add(-tolerance), currentTime.Add(tolerance));
         Assert.Null(account.ClosedAt);
         Assert.NotNull(account.Transactions);
         Assert.Empty(account.Transactions);
-        Assert.Equal(0, account.Balance); 
-
+        Assert.Equal(0, account.Balance);
+        Assert.Null(account.LastInterestAccrualAt);
         Assert.Equal(createDto.OwnerId, account.OwnerId);
         Assert.Equal(createDto.Type, account.Type);
         Assert.Equal(createDto.Currency, account.Currency);
@@ -189,14 +201,18 @@ public class AutoMapperUnitTests
     }
 
     [Fact]
+    [UsedImplicitly]
     public void UpdateAccountDto_To_Account_ValidInput_ValidResult()
     {
         // Arrange
         var updateDto = new UpdateAccountDto
         {
             InterestRate = 2.5m,
-            ClosedAt = DateTime.UtcNow.Date
+            ClosedAt = DateTime.UtcNow.Date,
+            CreditLimit = 54154m
         };
+        var tolerance = TimeSpan.FromSeconds(5);
+        var currentTime = DateTime.UtcNow;
 
         // Act
         var account = _mapper.Map<Account>(updateDto);
@@ -206,15 +222,16 @@ public class AutoMapperUnitTests
         Assert.Equal(default, account.OwnerId);
         Assert.Equal(default, account.Type);
         Assert.Null(account.Currency);
+        Assert.Equal(updateDto.CreditLimit, account.CreditLimit);
         Assert.Equal(0m, account.Balance);
-        Assert.Equal(default, account.CreatedAt);
+        Assert.InRange(account.CreatedAt, currentTime.Add(-tolerance), currentTime.Add(tolerance));
         Assert.Empty(account.Transactions);
-
         Assert.Equal(updateDto.InterestRate, account.InterestRate);
         Assert.Equal(updateDto.ClosedAt, account.ClosedAt);
     }
 
     [Fact]
+    [UsedImplicitly]
     public void Transaction_To_TransactionForStatementDto_ValidInput_ValidResult()
     {
         // Arrange

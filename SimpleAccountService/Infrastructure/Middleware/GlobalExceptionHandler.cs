@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Application.Models;
 using System.Net;
@@ -29,6 +30,10 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                 }
             case ConflictException conflictException:
                 mbError = new MbError(HttpStatusCode.Conflict, "Conflict error", conflictException.Message);
+                statusCode = HttpStatusCode.Conflict;
+                break;
+            case DbUpdateConcurrencyException concurrencyException:
+                mbError = new MbError(HttpStatusCode.Conflict, "Concurrency exception", concurrencyException.Message);
                 statusCode = HttpStatusCode.Conflict;
                 break;
             case NotFoundException notFoundException:
