@@ -43,6 +43,7 @@ public class AuthController(IHttpClientFactory httpClientFactory) : ControllerBa
         using var jsonDoc = JsonDocument.Parse(content);
         var accessToken = jsonDoc.RootElement.GetProperty("access_token").GetString();
 
+        
         return Content("Bearer " + accessToken!);
     }
 }

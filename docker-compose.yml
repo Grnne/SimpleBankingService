@@ -20,7 +20,24 @@
         condition: service_healthy
       keycloak:
         condition: service_healthy
-   
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports:
+      - "5672:5672"  
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      start_period: 10s
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2
     container_name: keycloak
@@ -56,7 +73,7 @@
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - ./.containers/products-db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
@@ -65,3 +82,7 @@
       timeout: 3s
       retries: 10
       start_period: 20s
+
+volumes:
+  postgres_data:
+  rabbitmq_data:

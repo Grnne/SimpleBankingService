@@ -2,13 +2,17 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Simple_Account_Service.Features.Accounts.Entities;
 using Simple_Account_Service.Features.Transactions.Entities;
+using Simple_Account_Service.Infrastructure.Messaging.Inbox;
+using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 
 namespace Simple_Account_Service.Infrastructure.Data;
 
 public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(options)
 {
-    public DbSet<Account> Accounts { get; set; }
-    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Account> Accounts { get; set; } = null!;
+    public DbSet<Transaction> Transactions { get; set; } = null!;
+    public DbSet<InboxConsumed> InboxConsumed { get; set; } = null!;
+    public DbSet<OutboxMessage> OutboxMessage { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
@@ -72,6 +76,11 @@ public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(op
 
             entity.HasIndex(t => t.Timestamp)
                 .HasMethod("gist");
+        });
+
+        modelBuilder.Entity<InboxConsumed>(entity =>
+        {
+            entity.HasKey(i => i.MessageId);
         });
 
         // Это ValueConverter для всех DateTime свойств
