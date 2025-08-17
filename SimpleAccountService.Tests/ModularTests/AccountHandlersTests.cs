@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using JetBrains.Annotations;
+using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
@@ -12,16 +13,19 @@ using Simple_Account_Service.Infrastructure.Repositories;
 
 namespace SimpleAccountService.Tests.ModularTests;
 
-[UsedImplicitly]
-public class AccountHandlersTests : IDisposable
+[UsedImplicitly] 
+public class AccountHandlersTests : IDisposable // TODO rework
 {
     private readonly SqliteConnection _connection;
     private readonly SasDbContext _context;
     private readonly AccountRepository _repository;
     private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
 
-    public AccountHandlersTests()
+
+    public AccountHandlersTests(IMediator mediator)
     {
+        _mediator = mediator;
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
@@ -47,7 +51,7 @@ public class AccountHandlersTests : IDisposable
     [UsedImplicitly]
     public async Task CreateAccountCommandHandler_ShouldCreateAccount()
     {
-        var handler = new CreateAccountCommandHandler(_repository, _mapper);
+        var handler = new CreateAccountCommandHandler(_context, _repository, _mapper, _mediator);
 
         var createDto = new CreateAccountDto
         {

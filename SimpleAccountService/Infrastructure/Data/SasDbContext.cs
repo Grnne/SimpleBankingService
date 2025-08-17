@@ -6,13 +6,14 @@ using Simple_Account_Service.Infrastructure.Messaging.Inbox;
 using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 
 namespace Simple_Account_Service.Infrastructure.Data;
-
+// TODO разбить на несколько дб контекстов
 public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(options)
 {
     public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
-    public DbSet<InboxConsumed> InboxConsumed { get; set; } = null!;
-    public DbSet<OutboxMessage> OutboxMessage { get; set; } = null!;
+    public DbSet<InboxConsumedMessage> InboxConsumedMessages { get; set; } = null!;
+    public DbSet<OutboxMessage> OutboxMessages { get; set; } = null!;
+    public DbSet<InboxDeadLetter> InboxDeadLetters { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
@@ -78,9 +79,46 @@ public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(op
                 .HasMethod("gist");
         });
 
-        modelBuilder.Entity<InboxConsumed>(entity =>
+        modelBuilder.Entity<OutboxMessage>(entity =>
+        {
+            entity.Property(o => o.Payload)
+                .HasColumnType("jsonb"); ;
+
+            entity.Property(o => o.EventType)
+                .HasMaxLength(100);
+
+            entity.Property(i => i.ProcessedAt)
+                .HasColumnType("timestamptz");
+
+            entity.Property(i => i.OccurredAt)
+                .HasColumnType("timestamptz");
+        });
+        
+        modelBuilder.Entity<InboxConsumedMessage>(entity =>
         {
             entity.HasKey(i => i.MessageId);
+
+            entity.Property(i => i.Handler).HasMaxLength(200);
+
+            entity.Property(i => i.ProcessedAt)
+                .HasColumnType("timestamptz");
+        });
+
+        modelBuilder.Entity<InboxDeadLetter>(entity =>
+        {
+            entity.HasKey(i => i.MessageId);
+
+            entity.Property(i => i.ReceivedAt)
+                .HasColumnType("timestamptz");
+
+            entity.Property(x => x.Handler)
+                .HasMaxLength(255);
+
+            entity.Property(x => x.Payload)
+                .HasColumnType("jsonb");
+
+            entity.Property(x => x.Error)
+                .HasMaxLength(1000);
         });
 
         // Это ValueConverter для всех DateTime свойств

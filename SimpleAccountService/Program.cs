@@ -2,9 +2,11 @@
 using Hangfire.Dashboard;
 using Microsoft.EntityFrameworkCore;
 using Simple_Account_Service.Application.ForFakesAndDummies;
+using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Extensions;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Infrastructure.Data;
+using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
 
 namespace Simple_Account_Service;
@@ -75,8 +77,13 @@ public class Program
         { 
             var rabbitSetup = scope.ServiceProvider.GetRequiredService<RabbitMqSetup>();
             rabbitSetup.InitializeAsync().GetAwaiter().GetResult();
-        }
 
+            var dispatcher = scope.ServiceProvider.GetRequiredService<IOutboxDispatcher>();
+            if (dispatcher is OutboxDispatcher concreteDispatcher)
+            {
+                concreteDispatcher.InitializeAsync().GetAwaiter().GetResult();
+            }
+        }
 
         app.UseSwagger();
         app.UseSwaggerUI(c =>
@@ -111,6 +118,11 @@ public class Program
             "DailyInterestAccrualJob",
             service => service.AddDailyInterestAsync(),
             Cron.Daily);
+
+        RecurringJob.AddOrUpdate<IOutboxDispatcher>(
+            "OutboxDispatcherJob",
+            dispatcher => dispatcher.DispatchAsync(CancellationToken.None),
+            Cron.Minutely);
 
         app.Run();
     }

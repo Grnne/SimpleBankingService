@@ -34,6 +34,7 @@ public class AccountsController(IMediator mediator) : ControllerBase
     /// </param>
     /// <returns>Возвращает созданный счет с кодом 201 Created, внутри MbResult.</returns>
     [HttpPost]
+    [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MbResult<AccountDto>))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(MbResult<string>))]
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<string>))]

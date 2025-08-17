@@ -24,6 +24,8 @@ public class Account
 
     public DateTime? ClosedAt { get; set; }
 
+    public bool Frozen { get; set; }
+
     public List<Transaction> Transactions { get; set; } = [];
 
     public uint Version { get; set; }
