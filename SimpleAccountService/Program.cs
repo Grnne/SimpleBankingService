@@ -56,7 +56,7 @@ public class Program
             {
                 Console.WriteLine("init migration");
                 // For dev purposes
-                //context.Database.EnsureDeleted(); 
+                context.Database.EnsureDeleted(); 
                 context.Database.Migrate();
             }
             catch (Exception e)

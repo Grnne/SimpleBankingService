@@ -70,9 +70,9 @@ public class OutboxDispatcher(
 
         var messagesEnumerable = await outboxRepository.GetUnprocessedAsync(cancellationToken);
 
-        var messages = (messagesEnumerable ?? Array.Empty<OutboxMessage>()).ToList();
+        var messages = (messagesEnumerable ?? []).ToList();
 
-        if (!messages.Any())
+        if (messages.Count == 0)
         {
             logger.LogInformation("No outbox messages to dispatch");
             return;

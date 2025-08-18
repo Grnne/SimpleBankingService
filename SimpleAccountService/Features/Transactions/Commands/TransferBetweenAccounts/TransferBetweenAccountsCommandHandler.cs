@@ -10,6 +10,7 @@ using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using System.Data;
+using Simple_Account_Service.Features.Transactions.Events;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
@@ -19,14 +20,14 @@ public class TransferBetweenAccountsCommandHandler(
     ITransactionService service,
     ITransactionRepository transactionRepository,
     IAccountRepository accountRepository,
-    IMapper mapper)
+    IMapper mapper,
+    IMediator mediator)
     : IRequestHandler<TransferBetweenAccountsCommand, MbResult<List<TransactionDto>>>
 {
     public async Task<MbResult<List<TransactionDto>>> Handle(TransferBetweenAccountsCommand request,
         CancellationToken cancellationToken)
     {
-        await using var transaction =
-            await context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+        await using var transaction = await context.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
         try
         {
@@ -42,6 +43,7 @@ public class TransferBetweenAccountsCommandHandler(
                 : TransactionType.Credit;
 
             var destinationAccount = await accountRepository.GetByIdAsync(transferDto.DestinationAccountId);
+
             if (destinationAccount == null)
             {
                 throw new NotFoundException($"Счет с id {transferDto.DestinationAccountId} не найден.");
@@ -76,6 +78,40 @@ public class TransferBetweenAccountsCommandHandler(
             await transactionRepository.CreateAsync(destinationTransaction);
             await accountRepository.UpdateAsync(sourceAccount);
             await accountRepository.UpdateAsync(destinationAccount);
+
+            var debitTransaction = sourceTransaction;
+            var creditTransaction = destinationTransaction;
+
+            if (debitTransaction.Type != TransactionType.Debit)
+            {
+                (debitTransaction, creditTransaction) = (creditTransaction, debitTransaction);
+            }
+            
+            await mediator.Publish(new MoneyDebited(
+                Transaction: debitTransaction,
+                Source: "transactions",
+                CorrelationId: Guid.NewGuid(),
+                CausationId: Guid.NewGuid(),
+                Reason: debitTransaction.Description), cancellationToken);
+
+            await mediator.Publish(new MoneyCredited(
+                Transaction: creditTransaction,
+                Source: "transactions",
+                CorrelationId: Guid.NewGuid(),
+                CausationId: Guid.NewGuid()), cancellationToken);
+
+            await mediator.Publish(new TransferCompleted(
+                SourceAccountId: sourceAccount.Id,
+                DestinationAccountId: destinationAccount.Id,
+                Amount: sourceTransaction.Amount,
+                Currency: sourceTransaction.Currency,
+                TransferSourceId: sourceTransaction.Id,
+                TransferDestinationId: destinationTransaction.Id,
+                Source: "transactions",
+                CorrelationId: Guid.NewGuid(),
+                CausationId: Guid.NewGuid()
+            ), cancellationToken);
+
 
             await transaction.CommitAsync(cancellationToken);
 

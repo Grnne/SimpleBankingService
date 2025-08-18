@@ -6,10 +6,19 @@ using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 
 namespace Simple_Account_Service.Application.Abstractions;
 
+public abstract class BaseOutboxEventHandler
+{
+    protected static readonly JsonSerializerOptions SerializeOptions = new()
+    {
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+    };
+}
+
 public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository repository)
-    : INotificationHandler<TEvent>
+    : BaseOutboxEventHandler, INotificationHandler<TEvent>
     where TEvent : IOutboxEvent
 {
+
     protected abstract TPayload MapPayload(TEvent outboxEvent);
 
     public async Task Handle(TEvent notification, CancellationToken cancellationToken)
@@ -35,10 +44,7 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
             Payload = payload
         };
 
-        var serializeOptions = new JsonSerializerOptions();
-        serializeOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-
-        var envelopeJson = JsonSerializer.Serialize(envelope, serializeOptions);
+        var envelopeJson = JsonSerializer.Serialize(envelope, SerializeOptions);
 
         var outboxMessage = new OutboxMessage
         {

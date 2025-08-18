@@ -82,7 +82,7 @@ public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(op
         modelBuilder.Entity<OutboxMessage>(entity =>
         {
             entity.Property(o => o.Payload)
-                .HasColumnType("jsonb"); ;
+                .HasColumnType("jsonb");
 
             entity.Property(o => o.EventType)
                 .HasMaxLength(100);

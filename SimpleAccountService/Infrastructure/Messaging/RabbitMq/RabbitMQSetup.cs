@@ -28,7 +28,7 @@ public class RabbitMqSetup(ILogger<RabbitMqSetup> logger) : IAsyncDisposable
         try
         {
             await _channel.QueueDeclareAsync("account.crm", true, false, false, null);
-            await _channel.QueueBindAsync("account.crm", "account.events", "account.*");
+            await _channel.QueueBindAsync("account.crm", "account.events", "account.#");
 
             await _channel.QueueDeclareAsync("account.notifications", true, false, false, null);
             await _channel.QueueBindAsync("account.notifications", "account.events", "money.*");
