@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace Simple_Account_Service.Application.Behaviors;
 

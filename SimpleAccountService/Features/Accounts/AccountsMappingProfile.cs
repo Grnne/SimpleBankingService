@@ -18,6 +18,7 @@ public class AccountsMappingProfile : Profile
                 opt.MapFrom(src => src.Transactions));
 
         CreateMap<UpdateAccountDto, Account>()
+            .ForMember(dest => dest.Frozen, opt => opt.Ignore())
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.OwnerId, opt => opt.Ignore())
             .ForMember(dest => dest.Type, opt => opt.Ignore())
@@ -31,6 +32,7 @@ public class AccountsMappingProfile : Profile
                 srcMember => srcMember != null));
 
         CreateMap<CreateAccountDto, Account>()
+            .ForMember(dest => dest.Frozen, opt => opt.Ignore())
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Balance, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())

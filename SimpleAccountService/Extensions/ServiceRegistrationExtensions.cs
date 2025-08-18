@@ -51,7 +51,7 @@ public static class ServiceRegistrationExtensions
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
-        
+
         services.AddSingleton<RabbitMqSetup>();
         // For dummy Keycloak token request
         services.AddHttpClient();

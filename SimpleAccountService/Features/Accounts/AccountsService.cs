@@ -31,7 +31,7 @@ public class AccountsService(IAccountRepository repository, SasDbContext context
                 var periodTo = updatedAccount.LastInterestAccrualAt ?? DateTime.UtcNow;
 
                 var amount = updatedAccount.Balance - account.Balance;
-                
+
                 var interestAccrued = new AccountInterestAccrued(
                     AccountId: account.Id,
                     PeriodFrom: periodFrom,

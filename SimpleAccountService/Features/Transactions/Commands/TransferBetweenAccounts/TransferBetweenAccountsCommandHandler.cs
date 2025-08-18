@@ -6,11 +6,11 @@ using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions.Entities;
+using Simple_Account_Service.Features.Transactions.Events;
 using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using System.Data;
-using Simple_Account_Service.Features.Transactions.Events;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
 
@@ -38,7 +38,7 @@ public class TransferBetweenAccountsCommandHandler(
                 : TransactionType.Credit;
 
             var destinationAccount = await accountRepository.GetByIdAsync(transferDto.DestinationAccountId);
-            
+
             if (destinationAccount == null)
             {
                 throw new NotFoundException($"Счет с id {transferDto.DestinationAccountId} не найден.");

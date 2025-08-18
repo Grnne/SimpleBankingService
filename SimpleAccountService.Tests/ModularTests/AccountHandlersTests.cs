@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.DeleteAccount;
 using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
 using Simple_Account_Service.Features.Accounts.Entities;
@@ -13,7 +12,7 @@ using Simple_Account_Service.Infrastructure.Repositories;
 
 namespace SimpleAccountService.Tests.ModularTests;
 
-[UsedImplicitly] 
+[UsedImplicitly]
 public class AccountHandlersTests : IDisposable // TODO rework
 {
     private readonly SqliteConnection _connection;

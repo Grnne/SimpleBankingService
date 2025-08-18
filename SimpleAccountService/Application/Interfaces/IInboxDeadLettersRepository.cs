@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Simple_Account_Service.Infrastructure.Messaging.Inbox;
+﻿using Simple_Account_Service.Infrastructure.Messaging.Inbox;
 
 namespace Simple_Account_Service.Application.Interfaces;
 

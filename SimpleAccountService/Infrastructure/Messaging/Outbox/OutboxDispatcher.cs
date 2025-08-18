@@ -16,7 +16,7 @@ public class RabbitMqOptions
 }
 
 public class OutboxDispatcher(IServiceScopeFactory scopeFactory, ILogger<OutboxDispatcher> logger,
-    IOptions<RabbitMqOptions> options) : BackgroundService, IAsyncDisposable 
+    IOptions<RabbitMqOptions> options) : BackgroundService, IAsyncDisposable
 {
     private readonly RabbitMqOptions _options = options.Value;
 

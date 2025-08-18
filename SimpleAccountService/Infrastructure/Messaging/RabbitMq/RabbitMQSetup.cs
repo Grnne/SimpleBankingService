@@ -13,7 +13,7 @@ public class RabbitMqSetup(ILogger<RabbitMqSetup> logger) : IAsyncDisposable
         var factory = new ConnectionFactory
         {
             // TODO from config
-            HostName = "rabbitmq", 
+            HostName = "rabbitmq",
             UserName = "guest",
             Password = "guest"
         };

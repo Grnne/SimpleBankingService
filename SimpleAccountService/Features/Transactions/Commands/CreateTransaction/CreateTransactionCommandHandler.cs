@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using JetBrains.Annotations;
 using MediatR;
-using Microsoft.AspNetCore.WebUtilities;
+using Simple_Account_Service.Application.Exceptions;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions.Entities;
@@ -14,7 +14,7 @@ namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransactio
 
 [UsedImplicitly]
 public class CreateTransactionCommandHandler(SasDbContext context, ITransactionRepository transactionRepository,
-    IAccountRepository accountRepository, ITransactionService service, IMapper mapper,    IMediator mediator,
+    IAccountRepository accountRepository, ITransactionService service, IMapper mapper, IMediator mediator,
     ILogger<CreateTransactionCommandHandler> logger)
     : IRequestHandler<CreateTransactionCommand, MbResult<TransactionDto>>
 {
@@ -28,6 +28,11 @@ public class CreateTransactionCommandHandler(SasDbContext context, ITransactionR
         {
             var account = await accountRepository.GetByIdAsync(request.AccountId);
             service.CheckAccount(request.AccountId, account, request.CreateTransactionDto.Type, request.CreateTransactionDto.Amount, request.CreateTransactionDto.Currency);
+
+            if (request.CreateTransactionDto.Type == TransactionType.Debit && account.Frozen)
+            {
+                throw new ConflictException($"Счет {request.AccountId} заморожен, невозможно перевести средства.");
+            }
 
             var accountTransaction = mapper.Map<Transaction>(request.CreateTransactionDto);
             accountTransaction.Id = Guid.NewGuid();

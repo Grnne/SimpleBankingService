@@ -1,9 +1,9 @@
-﻿using System.Text.Json;
-using Simple_Account_Service.Application.Abstractions;
+﻿using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Messaging.Inbox;
+using System.Text.Json;
 
 namespace Simple_Account_Service.Features.Accounts.Events;
 

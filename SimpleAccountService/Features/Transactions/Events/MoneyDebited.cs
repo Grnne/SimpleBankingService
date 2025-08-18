@@ -1,7 +1,6 @@
 ﻿using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Features.Transactions.Entities;
-using System;
 
 namespace Simple_Account_Service.Features.Transactions.Events;
 

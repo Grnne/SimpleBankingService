@@ -1,7 +1,7 @@
-﻿using System.Net;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Simple_Account_Service.Application.Models;
+using System.Net;
 
 namespace Simple_Account_Service.Extensions;
 
