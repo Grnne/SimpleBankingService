@@ -40,7 +40,8 @@ public class AccountsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(MbResult<string>))]
     public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto createAccountDto)
     {
-        var response = await mediator.Send(new CreateAccountCommand(createAccountDto));
+        var correlationId = GetOrCreateCorrelationId();
+        var response = await mediator.Send(new CreateAccountCommand(createAccountDto, correlationId));
 
         return StatusCode(StatusCodes.Status201Created, response);
     }
@@ -134,5 +135,15 @@ public class AccountsController(IMediator mediator) : ControllerBase
         var response = await mediator.Send(new CheckAccountExistsQuery(accountId));
 
         return Ok(response);
+    }
+
+    private Guid GetOrCreateCorrelationId()
+    {
+        if (Request.Headers.TryGetValue("X-Correlation-Id", out var cidString)
+            && Guid.TryParse(cidString, out var cid))
+        {
+            return cid;
+        }
+        return Guid.NewGuid();
     }
 }

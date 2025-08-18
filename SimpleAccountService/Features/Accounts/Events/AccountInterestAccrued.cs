@@ -16,8 +16,9 @@ public record AccountInterestAccrued(
     public DateTime OccurredAt { get; init; } = DateTime.UtcNow;
 }
 
-public class AccountInterestAccruedHandler(IOutboxRepository repository)
-    : BaseOutboxEventHandler<AccountInterestAccrued, object>(repository)
+public class AccountInterestAccruedHandler(IOutboxRepository repository,
+    ILogger<BaseOutboxEventHandler<AccountInterestAccrued, object>> logger)
+    : BaseOutboxEventHandler<AccountInterestAccrued, object>(repository, logger)
 {
     protected override object MapPayload(AccountInterestAccrued outboxEvent)
     {

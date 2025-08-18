@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using MediatR;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Application.Models;
@@ -14,7 +15,7 @@ public abstract class BaseOutboxEventHandler
     };
 }
 
-public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository repository)
+public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository repository, ILogger<BaseOutboxEventHandler<TEvent, TPayload>> logger)
     : BaseOutboxEventHandler, INotificationHandler<TEvent>
     where TEvent : IOutboxEvent
 {
@@ -23,11 +24,19 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
 
     public async Task Handle(TEvent notification, CancellationToken cancellationToken)
     {
+        logger.LogInformation("Handling outbox event {EventType} with EventId {EventId} CorrelationId {CorrelationId}",
+            typeof(TEvent).Name, notification.EventId, notification.CorrelationId);
+
+        var stopwatch = Stopwatch.StartNew();
+
+
         var payload = MapPayload(notification);
 
         if (payload == null)
         {
-            throw new InvalidOperationException($"Payload for event {typeof(TEvent).Name} cannot be null.");
+            var errorMsg = $"Payload for event {typeof(TEvent).Name} cannot be null.";
+            logger.LogError(errorMsg);
+            throw new InvalidOperationException(errorMsg);
         }
 
         var envelope = new EventEnvelope
@@ -61,5 +70,9 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
         };
 
         await repository.AddAsync(outboxMessage, cancellationToken);
+
+        stopwatch.Stop();
+        logger.LogInformation("Outbox message for event {EventId} saved successfully in {ElapsedMilliseconds} ms",
+            notification.EventId, stopwatch.ElapsedMilliseconds);
     }
 }

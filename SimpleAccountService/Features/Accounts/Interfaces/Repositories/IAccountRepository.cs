@@ -7,5 +7,7 @@ public interface IAccountRepository : IBaseRepository<Account>
 {
     public Task<IEnumerable<Account>> GetAllAccountsAsync();
 
+    public Task<Account?> GetByOwnerAsync(Guid accountId);
+
     Task<IEnumerable<Account>> GetAccountsEagerlyUpToEndDateByOwnerAsync(Guid ownerId, DateTime endDate);
 }

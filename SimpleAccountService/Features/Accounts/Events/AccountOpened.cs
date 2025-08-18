@@ -15,8 +15,8 @@ public record AccountOpened(Account Account, string Source, Guid CorrelationId, 
     public AccountType Type { get; init; } = Account.Type;
 }
 
-public class AccountOpenedHandler(IOutboxRepository repository)
-    : BaseOutboxEventHandler<AccountOpened, object>(repository)
+public class AccountOpenedHandler(IOutboxRepository repository, ILogger<BaseOutboxEventHandler<AccountOpened, object>> logger)
+    : BaseOutboxEventHandler<AccountOpened, object>(repository, logger)
 {
     protected override object MapPayload(AccountOpened outboxEvent)
     {

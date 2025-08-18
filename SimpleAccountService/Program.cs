@@ -2,21 +2,14 @@
 using Hangfire.Dashboard;
 using Microsoft.EntityFrameworkCore;
 using Simple_Account_Service.Application.ForFakesAndDummies;
-using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Extensions;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Infrastructure.Data;
-using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
 
 namespace Simple_Account_Service;
 
 // TODO https certificates self-signed or let's encrypt, some more tests; read bout uuid7, ask questions below
-
-// Спросить про: NodaTime, транзакции, выписки(проекции и поле для промежуточного ежемесячного баланса
-// возможно), 2 запроса или обработка большего количества данных, про полотно в program или отдельные файлы
-// с конфигурацией, про concurrency в контексте банковских операций, про возврат 204 delete
-// вспомнить, что хотел спросить(критически важно 🤡)
 
 public class Program
 {
@@ -48,22 +41,8 @@ public class Program
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
             var fakeDb = scope.ServiceProvider.GetRequiredService<FakeDb>();
 
-            // TODO don't forget to ask questions
-            // I see in output during migration and deletion Exception thrown: 'System.Net.Sockets.SocketException' in System.Net.Sockets.dll
-            // It does not affect application operation, but I cannot catch it
-
-            try
-            {
-                Console.WriteLine("init migration");
-                // For dev purposes
-                context.Database.EnsureDeleted(); 
-                context.Database.Migrate();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("wtf" + e.Message);
-                throw;
-            }
+            context.Database.EnsureDeleted();
+            context.Database.Migrate();
 
             DataSeeder.SeedFakeData(context, fakeDb);
         }
@@ -74,15 +53,9 @@ public class Program
 
         // TODO переделать в асинхронный main возможно
         using (var scope = app.Services.CreateScope())
-        { 
+        {
             var rabbitSetup = scope.ServiceProvider.GetRequiredService<RabbitMqSetup>();
             rabbitSetup.InitializeAsync().GetAwaiter().GetResult();
-
-            var dispatcher = scope.ServiceProvider.GetRequiredService<IOutboxDispatcher>();
-            if (dispatcher is OutboxDispatcher concreteDispatcher)
-            {
-                concreteDispatcher.InitializeAsync().GetAwaiter().GetResult();
-            }
         }
 
         app.UseSwagger();
@@ -118,11 +91,6 @@ public class Program
             "DailyInterestAccrualJob",
             service => service.AddDailyInterestAsync(),
             Cron.Daily);
-
-        RecurringJob.AddOrUpdate<IOutboxDispatcher>(
-            "OutboxDispatcherJob",
-            dispatcher => dispatcher.DispatchAsync(CancellationToken.None),
-            Cron.Minutely);
 
         app.Run();
     }

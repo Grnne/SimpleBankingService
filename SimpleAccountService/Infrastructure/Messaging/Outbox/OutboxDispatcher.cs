@@ -1,8 +1,9 @@
-﻿using System.Text;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using Simple_Account_Service.Application.Interfaces;
+using System.Diagnostics;
+using System.Text;
 
 namespace Simple_Account_Service.Infrastructure.Messaging.Outbox;
 
@@ -14,11 +15,8 @@ public class RabbitMqOptions
     public string ExchangeName { get; set; } = "account.events";
 }
 
-public class OutboxDispatcher(
-    IServiceScopeFactory scopeFactory,
-    ILogger<OutboxDispatcher> logger,
-    IOptions<RabbitMqOptions> options)
-    : IAsyncDisposable, IOutboxDispatcher, IDisposable
+public class OutboxDispatcher(IServiceScopeFactory scopeFactory, ILogger<OutboxDispatcher> logger,
+    IOptions<RabbitMqOptions> options) : BackgroundService, IAsyncDisposable 
 {
     private readonly RabbitMqOptions _options = options.Value;
 
@@ -58,60 +56,81 @@ public class OutboxDispatcher(
         }
     }
 
-    public async Task DispatchAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var scope = scopeFactory.CreateScope();
-        var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
+        await InitializeAsync();
 
-        if (_channel == null)
-        {
-            throw new InvalidOperationException("RabbitMQ channel not initialized. Call InitializeAsync first.");
-        }
-
-        var messagesEnumerable = await outboxRepository.GetUnprocessedAsync(cancellationToken);
-
-        var messages = (messagesEnumerable ?? []).ToList();
-
-        if (messages.Count == 0)
-        {
-            logger.LogInformation("No outbox messages to dispatch");
-            return;
-        }
-
-        foreach (var message in messages)
+        while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var body = Encoding.UTF8.GetBytes(message.Payload);
+                using var scope = scopeFactory.CreateScope();
+                var outboxRepository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
 
-                var props = new BasicProperties
+                if (_channel == null)
                 {
-                    Persistent = true,
-                    Headers = new Dictionary<string, object?>
+                    logger.LogWarning("RabbitMQ channel not initialized.");
+                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    continue;
+                }
+
+                var messagesEnumerable = await outboxRepository.GetUnprocessedAsync(stoppingToken);
+                var messages = (messagesEnumerable ?? []).ToList();
+
+                if (messages.Count == 0)
+                {
+                    logger.LogInformation("No outbox messages to dispatch");
+                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    continue;
+                }
+
+                foreach (var message in messages)
+                {
+                    var stopwatch = Stopwatch.StartNew();
+                    try
                     {
-                        { "x-correlation-id", message.CorrelationId.ToString() },
-                        { "x-causation-id", message.CausationId.ToString() },
-                        { "x-source", message.Source },
-                        { "x-version", message.Version }
+                        var body = Encoding.UTF8.GetBytes(message.Payload);
+
+                        var props = new BasicProperties
+                        {
+                            Persistent = true,
+                            Headers = new Dictionary<string, object?>
+                            {
+                                { "x-correlation-id", message.CorrelationId.ToString() },
+                                { "x-causation-id", message.CausationId.ToString() },
+                                { "x-source", message.Source },
+                                { "x-version", message.Version }
+                            }
+                        };
+
+                        await _channel.BasicPublishAsync(
+                            exchange: _options.ExchangeName,
+                            routingKey: ToSnakeDotCase(message.EventType),
+                            mandatory: true,
+                            basicProperties: props,
+                            body: body,
+                            cancellationToken: stoppingToken);
+
+                        stopwatch.Stop();
+
+                        await outboxRepository.MarkAsProcessedAsync(message.Id, stoppingToken);
+
+                        logger.LogInformation("Dispatched message {MessageId} Type={EventType} CorrelationId={CorrelationId} Latency={Latency}ms RoutingKey={RoutingKey}",
+                            message.Id, message.EventType, message.CorrelationId, stopwatch.ElapsedMilliseconds, ToSnakeDotCase(message.EventType));
                     }
-                };
-
-                await _channel.BasicPublishAsync(
-                    exchange: _options.ExchangeName,
-                    routingKey: ToSnakeDotCase(message.EventType),
-                    mandatory: true,
-                    basicProperties: props,
-                    body: body, cancellationToken: cancellationToken);
-
-                await outboxRepository.MarkAsProcessedAsync(message.Id, cancellationToken);
-
-                logger.LogInformation("Dispatched message {MessageId} with routing key {RoutingKey}",
-                    message.Id, ToSnakeDotCase(message.EventType));
+                    catch (Exception ex)
+                    {
+                        stopwatch.Stop();
+                        logger.LogError(ex, "Failed to dispatch message {MessageId} after {ElapsedMilliseconds}ms", message.Id, stopwatch.ElapsedMilliseconds);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to dispatch message {MessageId}", message.Id);
+                logger.LogError(ex, "Error in OutboxDispatcherBackgroundService loop");
             }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
         }
     }
 
@@ -147,11 +166,5 @@ public class OutboxDispatcher(
     {
         if (_connection != null) await _connection.DisposeAsync();
         if (_channel != null) await _channel.DisposeAsync();
-    }
-
-    public void Dispose()
-    {
-        _connection?.Dispose();
-        _channel?.Dispose();
     }
 }

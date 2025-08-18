@@ -16,8 +16,8 @@ public record MoneyDebited(Transaction Transaction, string Source, Guid Correlat
     public Guid OperationId { get; init; } = Transaction.Id;
 }
 
-public class MoneyDebitedHandler(IOutboxRepository repository)
-    : BaseOutboxEventHandler<MoneyDebited, object>(repository)
+public class MoneyDebitedHandler(IOutboxRepository repository, ILogger<BaseOutboxEventHandler<MoneyDebited, object>> logger)
+    : BaseOutboxEventHandler<MoneyDebited, object>(repository, logger)
 {
     protected override object MapPayload(MoneyDebited outboxEvent)
     {

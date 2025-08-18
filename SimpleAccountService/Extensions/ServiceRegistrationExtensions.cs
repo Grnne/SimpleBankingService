@@ -5,6 +5,7 @@ using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Features.Accounts;
+using Simple_Account_Service.Features.Accounts.Consumers;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions;
@@ -28,7 +29,10 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<ITransactionService, TransactionsService>();
         services.AddScoped<IAccountsService, AccountsService>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
-        services.AddSingleton<IOutboxDispatcher, OutboxDispatcher>();
+        services.AddScoped<IInboxRepository, InboxRepository>();
+        services.AddScoped<IInboxDeadLettersRepository, InboxDeadLettersRepository>();
+        services.AddHostedService<OutboxDispatcher>();
+        services.AddHostedService<AntifraudConsumer>();
 
         return services;
     }

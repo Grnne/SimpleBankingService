@@ -22,6 +22,12 @@ public class AccountRepository(SasDbContext context) : IAccountRepository
             .FirstOrDefaultAsync(a => a.Id == accountId);
     }
 
+    public async Task<Account?> GetByOwnerAsync(Guid ownerId)
+    {
+        return await context.Accounts
+            .FirstOrDefaultAsync(a => a.OwnerId == ownerId);
+    }
+
     public async Task<Account> UpdateAsync(Account entity)
     {
         context.Accounts.Update(entity);

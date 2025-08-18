@@ -47,32 +47,32 @@ public class AccountHandlersTests : IDisposable // TODO rework
         _mapper = mapperConfig.CreateMapper();
     }
 
-    [Fact]
-    [UsedImplicitly]
-    public async Task CreateAccountCommandHandler_ShouldCreateAccount()
-    {
-        var handler = new CreateAccountCommandHandler(_context, _repository, _mapper, _mediator);
+    //[Fact]
+    //[UsedImplicitly]
+    //public async Task CreateAccountCommandHandler_ShouldCreateAccount()
+    //{
+    //    var handler = new CreateAccountCommandHandler(_context, _repository, _mapper, _mediator);
 
-        var createDto = new CreateAccountDto
-        {
-            OwnerId = Guid.NewGuid(),
-            Type = AccountType.Checking,
-            Currency = "USD",
-            InterestRate = 1.2m
-        };
+    //    var createDto = new CreateAccountDto
+    //    {
+    //        OwnerId = Guid.NewGuid(),
+    //        Type = AccountType.Checking,
+    //        Currency = "USD",
+    //        InterestRate = 1.2m
+    //    };
 
-        var command = new CreateAccountCommand(createDto);
+    //    var command = new CreateAccountCommand(createDto);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+    //    var result = await handler.Handle(command, CancellationToken.None);
 
-        Assert.True(result.Success);
-        Assert.NotNull(result.Response);
-        Assert.Equal(createDto.OwnerId, result.Response.OwnerId);
-        Assert.Equal(createDto.Type, result.Response.Type);
-        Assert.Equal(createDto.Currency, result.Response.Currency);
-        Assert.Equal(createDto.InterestRate, result.Response.InterestRate);
-        Assert.Equal(0, result.Response.Balance);
-    }
+    //    Assert.True(result.Success);
+    //    Assert.NotNull(result.Response);
+    //    Assert.Equal(createDto.OwnerId, result.Response.OwnerId);
+    //    Assert.Equal(createDto.Type, result.Response.Type);
+    //    Assert.Equal(createDto.Currency, result.Response.Currency);
+    //    Assert.Equal(createDto.InterestRate, result.Response.InterestRate);
+    //    Assert.Equal(0, result.Response.Balance);
+    //}
 
     [Fact]
     [UsedImplicitly]

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Simple_Account_Service.Application.Behaviors;
 
@@ -10,15 +11,27 @@ public class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TReque
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
+        var requestName = typeof(TRequest).Name;
+        logger.LogInformation("Handling {RequestType} with data: {@Request}", requestName, request);
+
         var stopwatch = Stopwatch.StartNew();
 
-        logger.LogInformation("Handling {RequestType}", typeof(TRequest).Name);
-        var response = await next(cancellationToken);
-        stopwatch.Stop();
+        try
+        {
+            var response = await next(cancellationToken);
 
-        logger.LogInformation("Handled {ResponseType} in {ElapsedMilliseconds}ms",
-            typeof(TResponse).Name, stopwatch.ElapsedMilliseconds);
+            stopwatch.Stop();
 
-        return response;
+            logger.LogInformation("Handled {ResponseType} in {ElapsedMilliseconds}ms with response data: {@Response}",
+                typeof(TResponse).Name, stopwatch.ElapsedMilliseconds, response);
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            logger.LogError(ex, "Error handling {RequestType} after {ElapsedMilliseconds}ms", requestName, stopwatch.ElapsedMilliseconds);
+            throw;
+        }
     }
 }

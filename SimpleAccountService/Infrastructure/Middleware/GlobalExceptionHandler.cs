@@ -44,6 +44,10 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
                 mbError = new MbError(HttpStatusCode.Unauthorized, "Unauthorized", unauthorizedAccessException.Message);
                 statusCode = HttpStatusCode.Unauthorized;
                 break;
+            case ServerException serverException:
+                mbError = new MbError(HttpStatusCode.ServiceUnavailable, "ServiceUnavailable", serverException.Message);
+                statusCode = HttpStatusCode.Unauthorized;
+                break;
             default:
                 mbError = new MbError(HttpStatusCode.InternalServerError, "Internal Server Error");
                 statusCode = HttpStatusCode.InternalServerError;

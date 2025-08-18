@@ -18,8 +18,9 @@ public record TransferCompleted(
     public DateTime OccurredAt { get; init; } = DateTime.UtcNow;
 }
 
-public class TransferCompletedHandler(IOutboxRepository repository)
-    : BaseOutboxEventHandler<TransferCompleted, object>(repository)
+public class TransferCompletedHandler(IOutboxRepository repository,
+    ILogger<BaseOutboxEventHandler<TransferCompleted, object>> logger)
+    : BaseOutboxEventHandler<TransferCompleted, object>(repository, logger)
 {
     protected override object MapPayload(TransferCompleted outboxEvent)
     {
