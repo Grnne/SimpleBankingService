@@ -27,16 +27,16 @@ public class RabbitMqSetup(ILogger<RabbitMqSetup> logger) : IAsyncDisposable
             durable: true);
         try
         {
-            await _channel.QueueDeclareAsync("account.crm", true, false, false, null);
+            await _channel.QueueDeclareAsync("account.crm", true, false, false);
             await _channel.QueueBindAsync("account.crm", "account.events", "account.#");
 
-            await _channel.QueueDeclareAsync("account.notifications", true, false, false, null);
+            await _channel.QueueDeclareAsync("account.notifications", true, false, false);
             await _channel.QueueBindAsync("account.notifications", "account.events", "money.*");
 
-            await _channel.QueueDeclareAsync("account.antifraud", true, false, false, null);
+            await _channel.QueueDeclareAsync("account.antifraud", true, false, false);
             await _channel.QueueBindAsync("account.antifraud", "account.events", "client.*");
 
-            await _channel.QueueDeclareAsync("account.audit", true, false, false, null);
+            await _channel.QueueDeclareAsync("account.audit", true, false, false);
             await _channel.QueueBindAsync("account.audit", "account.events", "#");
 
             logger.LogInformation("RabbitMQ topology initialized: exchange and queues declared with bindings.");

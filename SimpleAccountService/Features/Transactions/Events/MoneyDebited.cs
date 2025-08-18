@@ -14,7 +14,6 @@ public record MoneyDebited(Transaction Transaction, string Source, Guid Correlat
     public decimal Amount { get; init; } = Transaction.Amount;
     public string Currency { get; init; } = Transaction.Currency;
     public Guid OperationId { get; init; } = Transaction.Id;
-    public string? Reason { get; init; } = Reason;
 }
 
 public class MoneyDebitedHandler(IOutboxRepository repository)

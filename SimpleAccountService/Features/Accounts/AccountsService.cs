@@ -20,7 +20,6 @@ public class AccountsService(IAccountRepository repository, SasDbContext context
             try
             {
                 var periodFrom = account.LastInterestAccrualAt ?? DateTime.UtcNow.AddDays(-1);
-                var balance = account.Balance;
 
                 await context.Database.ExecuteSqlInterpolatedAsync($"CALL public.accrue_interest({account.Id})");
 
