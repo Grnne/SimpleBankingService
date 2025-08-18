@@ -1,5 +1,4 @@
-﻿using Simple_Account_Service.Application.Abstractions;
-using Simple_Account_Service.Application.Interfaces;
+﻿using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Features.Accounts.Entities;
 
 namespace Simple_Account_Service.Features.Accounts.Events;
@@ -13,20 +12,4 @@ public record AccountOpened(Account Account, string Source, Guid CorrelationId, 
     public string Currency { get; init; } = Account.Currency;
     public decimal? CreditLimit { get; init; } = Account.CreditLimit;
     public AccountType Type { get; init; } = Account.Type;
-}
-
-public class AccountOpenedHandler(IOutboxRepository repository)
-    : BaseOutboxEventHandler<AccountOpened, object>(repository)
-{
-    protected override object MapPayload(AccountOpened outboxEvent)
-    {
-        return new
-        {
-            accountId = outboxEvent.AccountId,
-            ownerId = outboxEvent.OwnerId,
-            currency = outboxEvent.Currency,
-            creditLimit = outboxEvent.CreditLimit,
-            type = outboxEvent.Type
-        };
-    }
 }

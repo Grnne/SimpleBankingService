@@ -52,7 +52,7 @@ public class AccountRepository(SasDbContext context) : IAccountRepository
         return true;
     }
 
-    public async Task<IEnumerable<Account>> GetAllAccountsAsync()
+    public async Task<IEnumerable<Account>> GetAllAccountsAsync(CancellationToken cancellationToken)
     {
         return await context.Accounts
             .Include(a => a.Transactions)

@@ -10,6 +10,7 @@ using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using System.Data;
+using MassTransit;
 using Simple_Account_Service.Features.Transactions.Events;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.TransferBetweenAccounts;
@@ -21,7 +22,7 @@ public class TransferBetweenAccountsCommandHandler(
     ITransactionRepository transactionRepository,
     IAccountRepository accountRepository,
     IMapper mapper,
-    IMediator mediator)
+    IPublishEndpoint publishEndpoint)
     : IRequestHandler<TransferBetweenAccountsCommand, MbResult<List<TransactionDto>>>
 {
     public async Task<MbResult<List<TransactionDto>>> Handle(TransferBetweenAccountsCommand request,
@@ -86,31 +87,30 @@ public class TransferBetweenAccountsCommandHandler(
             {
                 (debitTransaction, creditTransaction) = (creditTransaction, debitTransaction);
             }
-            
-            await mediator.Publish(new MoneyDebited(
-                Transaction: debitTransaction,
-                Source: "transactions",
-                CorrelationId: Guid.NewGuid(),
-                CausationId: Guid.NewGuid(),
-                Reason: debitTransaction.Description), cancellationToken);
 
-            await mediator.Publish(new MoneyCredited(
-                Transaction: creditTransaction,
-                Source: "transactions",
-                CorrelationId: Guid.NewGuid(),
-                CausationId: Guid.NewGuid()), cancellationToken);
+            await publishEndpoint.Publish(new MoneyDebited(
+                debitTransaction,
+                "transactions",
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                debitTransaction.Description), cancellationToken);
 
-            await mediator.Publish(new TransferCompleted(
-                SourceAccountId: sourceAccount.Id,
-                DestinationAccountId: destinationAccount.Id,
-                Amount: sourceTransaction.Amount,
-                Currency: sourceTransaction.Currency,
-                TransferSourceId: sourceTransaction.Id,
-                TransferDestinationId: destinationTransaction.Id,
-                Source: "transactions",
-                CorrelationId: Guid.NewGuid(),
-                CausationId: Guid.NewGuid()
-            ), cancellationToken);
+            await publishEndpoint.Publish(new MoneyCredited(
+                creditTransaction,
+                "transactions",
+                Guid.NewGuid(),
+                Guid.NewGuid()), cancellationToken);
+
+            await publishEndpoint.Publish(new TransferCompleted(
+                sourceAccount.Id,
+                destinationAccount.Id,
+                sourceTransaction.Amount,
+                sourceTransaction.Currency,
+                sourceTransaction.Id,
+                destinationTransaction.Id,
+                "transactions",
+                Guid.NewGuid(),
+                Guid.NewGuid()), cancellationToken);
 
 
             await transaction.CommitAsync(cancellationToken);

@@ -5,7 +5,7 @@ namespace Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 
 public interface IAccountRepository : IBaseRepository<Account>
 {
-    public Task<IEnumerable<Account>> GetAllAccountsAsync();
+    public Task<IEnumerable<Account>> GetAllAccountsAsync(CancellationToken cancellationToken);
 
     Task<IEnumerable<Account>> GetAccountsEagerlyUpToEndDateByOwnerAsync(Guid ownerId, DateTime endDate);
 }

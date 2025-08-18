@@ -11,7 +11,7 @@ public class GetAllAccountsQueryHandler(IAccountRepository repository, IMapper m
 {
     public async Task<MbResult<IEnumerable<AccountDto>>> Handle(GetAllAccountsQuery request, CancellationToken cancellationToken)
     {
-        var accounts = await repository.GetAllAccountsAsync();
+        var accounts = await repository.GetAllAccountsAsync(CancellationToken.None);
 
         return new MbResult<IEnumerable<AccountDto>>(mapper.Map<IEnumerable<AccountDto>>(accounts));
     }

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using JetBrains.Annotations;
+using MassTransit;
 using MediatR;
-using Microsoft.AspNetCore.WebUtilities;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions.Entities;
@@ -12,9 +11,9 @@ using Simple_Account_Service.Infrastructure.Data;
 
 namespace Simple_Account_Service.Features.Transactions.Commands.CreateTransaction;
 
-[UsedImplicitly]
-public class CreateTransactionCommandHandler(SasDbContext context, ITransactionRepository transactionRepository, IAccountRepository accountRepository, ITransactionService service,
-    IMapper mapper, IMediator mediator) : IRequestHandler<CreateTransactionCommand, MbResult<TransactionDto>>
+public class CreateTransactionCommandHandler(SasDbContext context, ITransactionRepository transactionRepository,
+    IAccountRepository accountRepository, ITransactionService service, IMapper mapper, IPublishEndpoint publishEndpoint)
+    : IRequestHandler<CreateTransactionCommand, MbResult<TransactionDto>>
 {
     public async Task<MbResult<TransactionDto>> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
@@ -49,30 +48,29 @@ public class CreateTransactionCommandHandler(SasDbContext context, ITransactionR
 
             if (createTransactionDto.Type == TransactionType.Credit)
             {
-                await mediator.Publish(new MoneyCredited(
-                    Transaction: accountTransaction,
-                    Source: "transactions",
-                    CorrelationId: Guid.NewGuid(),
-                    CausationId: Guid.NewGuid()
-                ), cancellationToken);
+                await publishEndpoint.Publish(new MoneyCredited(
+                    accountTransaction,
+                    "transactions",
+                    Guid.NewGuid(),
+                    Guid.NewGuid()), cancellationToken);
             }
             else
             {
-                await mediator.Publish(new MoneyDebited(
-                    Transaction: accountTransaction,
-                    Source: "transactions",
-                    CorrelationId: Guid.NewGuid(),
-                    CausationId: Guid.NewGuid(),
-                    Reason: accountTransaction.Description
-                ), cancellationToken);
+                await publishEndpoint.Publish(new MoneyDebited(
+                    accountTransaction,
+                    "transactions",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    accountTransaction.Description), cancellationToken);
             }
 
             await accountRepository.UpdateAsync(account);
+            await context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             return new MbResult<TransactionDto>(mapper.Map<TransactionDto>(result));
         }
-        catch (Exception)
+        catch
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;

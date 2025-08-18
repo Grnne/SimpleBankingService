@@ -2,5 +2,5 @@
 
 public interface IAccountsService
 {
-    Task AddDailyInterestAsync();
+    Task AddDailyInterestAsync(CancellationToken cancellationToken);
 }

@@ -10,8 +10,6 @@ using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
-using Simple_Account_Service.Infrastructure.Messaging.Outbox;
-using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
 using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Reflection;
@@ -28,7 +26,6 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<ITransactionService, TransactionsService>();
         services.AddScoped<IAccountsService, AccountsService>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
-        services.AddSingleton<IOutboxDispatcher, OutboxDispatcher>();
 
         return services;
     }
@@ -48,7 +45,6 @@ public static class ServiceRegistrationExtensions
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         
-        services.AddSingleton<RabbitMqSetup>();
         // For dummy Keycloak token request
         services.AddHttpClient();
 

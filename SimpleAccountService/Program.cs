@@ -6,8 +6,7 @@ using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Extensions;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Infrastructure.Data;
-using Simple_Account_Service.Infrastructure.Messaging.Outbox;
-using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
+using System.Threading;
 
 namespace Simple_Account_Service;
 
@@ -39,7 +38,8 @@ public class Program
             .AddCommonServices()
             .AddAutoMapper(typeof(Program))
             .AddCustomSwagger()
-            .AddCustomHangfire(builder.Configuration);
+            .AddCustomHangfire(builder.Configuration)
+            .AddMassTransitWithRabbitMq(builder.Configuration);
 
         var app = builder.Build();
 
@@ -48,15 +48,11 @@ public class Program
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
             var fakeDb = scope.ServiceProvider.GetRequiredService<FakeDb>();
 
-            // TODO don't forget to ask questions
-            // I see in output during migration and deletion Exception thrown: 'System.Net.Sockets.SocketException' in System.Net.Sockets.dll
-            // It does not affect application operation, but I cannot catch it
-
             try
             {
                 Console.WriteLine("init migration");
                 // For dev purposes
-                context.Database.EnsureDeleted(); 
+                context.Database.EnsureDeleted();
                 context.Database.Migrate();
             }
             catch (Exception e)
@@ -69,21 +65,8 @@ public class Program
         }
 
         // Refactor for build/dev
-        //app.UseDeveloperExceptionPage();
-        app.UseExceptionHandler();
-
-        // TODO переделать в асинхронный main возможно
-        using (var scope = app.Services.CreateScope())
-        { 
-            var rabbitSetup = scope.ServiceProvider.GetRequiredService<RabbitMqSetup>();
-            rabbitSetup.InitializeAsync().GetAwaiter().GetResult();
-
-            var dispatcher = scope.ServiceProvider.GetRequiredService<IOutboxDispatcher>();
-            if (dispatcher is OutboxDispatcher concreteDispatcher)
-            {
-                concreteDispatcher.InitializeAsync().GetAwaiter().GetResult();
-            }
-        }
+        app.UseDeveloperExceptionPage();
+        //app.UseExceptionHandler();
 
         app.UseSwagger();
         app.UseSwaggerUI(c =>
@@ -116,7 +99,7 @@ public class Program
 
         RecurringJob.AddOrUpdate<IAccountsService>(
             "DailyInterestAccrualJob",
-            service => service.AddDailyInterestAsync(),
+            service => service.AddDailyInterestAsync(CancellationToken.None),
             Cron.Daily);
 
         RecurringJob.AddOrUpdate<IOutboxDispatcher>(

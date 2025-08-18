@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using JetBrains.Annotations;
+using MassTransit;
 using MediatR;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Entities;
@@ -10,7 +11,7 @@ using Simple_Account_Service.Infrastructure.Data;
 namespace Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 
 [UsedImplicitly]
-public class CreateAccountCommandHandler(SasDbContext context, IAccountRepository repository, IMapper mapper, IMediator mediator)
+public class CreateAccountCommandHandler(SasDbContext context, IAccountRepository repository, IMapper mapper, IPublishEndpoint publishEndpoint)
     : IRequestHandler<CreateAccountCommand, MbResult<AccountDto>>
 {
     public async Task<MbResult<AccountDto>> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
@@ -32,8 +33,9 @@ public class CreateAccountCommandHandler(SasDbContext context, IAccountRepositor
             var correlationId = Guid.NewGuid(); // TODO в контроллер
             var causationId = Guid.NewGuid();
 
-            await mediator.Publish(new AccountOpened(response, source, correlationId, causationId), cancellationToken);
+            await publishEndpoint.Publish(new AccountOpened(response, source, correlationId, causationId), cancellationToken);
 
+            await context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             return new MbResult<AccountDto>(mapper.Map<AccountDto>(response));

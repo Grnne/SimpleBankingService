@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Simple_Account_Service.Features.Accounts.Entities;
@@ -13,9 +14,11 @@ using Simple_Account_Service.Infrastructure.Data;
 namespace Simple_Account_Service.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(SasDbContext))]
-    partial class SasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250818121151_MassTransit")]
+    partial class MassTransit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
