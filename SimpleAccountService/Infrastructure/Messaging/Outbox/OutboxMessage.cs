@@ -1,9 +1,12 @@
-﻿namespace Simple_Account_Service.Infrastructure.Messaging.Outbox;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Simple_Account_Service.Infrastructure.Messaging.Outbox;
 
 public class OutboxMessage
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string EventType { get; set; } = null!;
+    [MaxLength(5000)]
     public string Payload { get; set; } = null!;
     public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
     public DateTime? ProcessedAt { get; set; }

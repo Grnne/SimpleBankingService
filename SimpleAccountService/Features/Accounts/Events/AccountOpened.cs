@@ -1,4 +1,5 @@
-﻿using Simple_Account_Service.Application.Abstractions;
+﻿using JetBrains.Annotations;
+using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Features.Accounts.Entities;
 
@@ -14,7 +15,7 @@ public record AccountOpened(Account Account, string Source, Guid CorrelationId, 
     public decimal? CreditLimit { get; init; } = Account.CreditLimit;
     public AccountType Type { get; init; } = Account.Type;
 }
-
+[UsedImplicitly]
 public class AccountOpenedHandler(IOutboxRepository repository, ILogger<BaseOutboxEventHandler<AccountOpened, object>> logger)
     : BaseOutboxEventHandler<AccountOpened, object>(repository, logger)
 {

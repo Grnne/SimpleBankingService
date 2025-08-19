@@ -1,4 +1,5 @@
-﻿using Simple_Account_Service.Application.Abstractions;
+﻿using JetBrains.Annotations;
+using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Features.Transactions.Entities;
 
@@ -15,6 +16,7 @@ public record MoneyCredited(Transaction Transaction, string Source, Guid Correla
     public Guid OperationId { get; init; } = Transaction.Id;
 }
 
+[UsedImplicitly]
 public class MoneyCreditedHandler(IOutboxRepository repository, ILogger<BaseOutboxEventHandler<MoneyCredited, object>> logger)
     : BaseOutboxEventHandler<MoneyCredited, object>(repository, logger)
 {

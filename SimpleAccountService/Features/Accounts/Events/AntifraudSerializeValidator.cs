@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using JetBrains.Annotations;
 using Simple_Account_Service.Application.Abstractions;
 
 namespace Simple_Account_Service.Features.Accounts.Events;
@@ -17,7 +18,7 @@ public class AntifraudEventValidator<T> : AbstractValidator<T> where T : Antifra
 
         RuleFor(x => x.Meta).NotNull().WithMessage("Meta обязан быть задан");
 
-        When(x => true, () =>
+        When(_ => true, () =>
         {
             RuleFor(x => x.Meta.Version)
                 .Equal("v1").WithMessage("Version должен быть 'v1'");
@@ -35,7 +36,7 @@ public class AntifraudEventValidator<T> : AbstractValidator<T> where T : Antifra
         });
     }
 }
-
+[UsedImplicitly]
 public class ClientBlockedValidator : AbstractValidator<ClientBlocked>
 {
     public ClientBlockedValidator()
@@ -47,7 +48,7 @@ public class ClientBlockedValidator : AbstractValidator<ClientBlocked>
             .Must(id => id != Guid.Empty).WithMessage("ClientId не может быть пустым GUID");
     }
 }
-
+[UsedImplicitly]
 public class ClientUnblockedValidator : AbstractValidator<ClientUnblocked>
 {
     public ClientUnblockedValidator()

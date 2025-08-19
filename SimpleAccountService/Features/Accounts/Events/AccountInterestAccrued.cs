@@ -1,4 +1,5 @@
-﻿using Simple_Account_Service.Application.Abstractions;
+﻿using JetBrains.Annotations;
+using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 
 namespace Simple_Account_Service.Features.Accounts.Events;
@@ -15,7 +16,7 @@ public record AccountInterestAccrued(
     public Guid EventId { get; init; } = Guid.NewGuid();
     public DateTime OccurredAt { get; init; } = DateTime.UtcNow;
 }
-
+[UsedImplicitly]
 public class AccountInterestAccruedHandler(IOutboxRepository repository,
     ILogger<BaseOutboxEventHandler<AccountInterestAccrued, object>> logger)
     : BaseOutboxEventHandler<AccountInterestAccrued, object>(repository, logger)

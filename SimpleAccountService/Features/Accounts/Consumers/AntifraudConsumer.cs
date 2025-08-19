@@ -60,7 +60,7 @@ public class AntifraudConsumer(IServiceScopeFactory scopeFactory, ILogger<Antifr
             {
                 using var scope = scopeFactory.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                var inboxRepository = scope.ServiceProvider.GetRequiredService<IInboxRepository>();
+                scope.ServiceProvider.GetRequiredService<IInboxRepository>();
                 var deadLetterRepository = scope.ServiceProvider.GetRequiredService<IInboxDeadLettersRepository>();
                 var body = Encoding.UTF8.GetString(ea.Body.ToArray());
                 var routingKey = ea.RoutingKey;

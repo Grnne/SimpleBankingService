@@ -14,7 +14,7 @@ public class InboxRepository(SasDbContext context) : IInboxRepository
             .AnyAsync(x => x.MessageId == eventId, cancellationToken);
     }
 
-    public async Task AddProcessedAsync(Guid eventId, string handler, CancellationToken cancellationToken)
+    public async Task AddProcessedAsync(Guid eventId, string? handler, CancellationToken cancellationToken)
     {
         var entity = new InboxConsumedMessage
         {

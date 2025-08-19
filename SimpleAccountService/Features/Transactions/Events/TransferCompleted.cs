@@ -1,4 +1,5 @@
-﻿using Simple_Account_Service.Application.Abstractions;
+﻿using JetBrains.Annotations;
+using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 
 namespace Simple_Account_Service.Features.Transactions.Events;
@@ -18,6 +19,7 @@ public record TransferCompleted(
     public DateTime OccurredAt { get; init; } = DateTime.UtcNow;
 }
 
+[UsedImplicitly]
 public class TransferCompletedHandler(IOutboxRepository repository,
     ILogger<BaseOutboxEventHandler<TransferCompleted, object>> logger)
     : BaseOutboxEventHandler<TransferCompleted, object>(repository, logger)

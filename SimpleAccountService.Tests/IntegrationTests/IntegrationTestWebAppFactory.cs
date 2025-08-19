@@ -1,4 +1,5 @@
 ﻿using DotNet.Testcontainers.Builders;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -49,10 +50,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         var testConnectionString = _postgresContainer.GetConnectionString();
-        var rabbitHostName = "localhost"; // Для TCP подключения снаружи контейнера
+        const string rabbitHostName = "localhost"; // Для TCP подключения снаружи контейнера
         var rabbitPort = _rmqContainer.GetMappedPublicPort(5672);
 
-        builder.ConfigureAppConfiguration((context, config) =>
+        builder.ConfigureAppConfiguration((_, config) =>
         {
             var dict = new Dictionary<string, string>
             {
@@ -62,7 +63,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 ["RabbitMQ:Username"] = "guest",
                 ["RabbitMQ:Password"] = "guest"
             };
-            config.AddInMemoryCollection(dict);
+            config.AddInMemoryCollection(dict.Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value)));
         });
 
         builder.ConfigureLogging(logging =>
@@ -92,12 +93,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             services.AddAuthorization();
         });
     }
-
-    public async Task StopRabbitMqAsync()
+    [UsedImplicitly]
+    public async Task StopRabbitMqAsync() // TODO 
     {
         await _rmqContainer.StopAsync();
     }
-
+    [UsedImplicitly]
     public async Task StartRabbitMqAsync()
     {
         await _rmqContainer.StartAsync();

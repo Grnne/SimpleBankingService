@@ -20,6 +20,8 @@
         condition: service_healthy
       keycloak:
         condition: service_healthy
+    networks:
+        main:
 
   rabbitmq:
     image: rabbitmq:4-management
@@ -28,8 +30,9 @@
       - "5672:5672"  
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__UserName: guest
+      RabbitMQ__Password: guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -38,6 +41,8 @@
       interval: 5s
       timeout: 10s
       retries: 5
+    networks:
+        main:
     
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2
@@ -65,6 +70,8 @@
         timeout: 3s
         retries: 10
         start_period: 20s
+    networks:
+        main:
 
   sas-db:
     image: postgres:latest
@@ -83,6 +90,12 @@
       timeout: 3s
       retries: 10
       start_period: 20s
+    networks:
+        main:
+
+networks:
+  main:
+    driver: bridge
 
 volumes:
   postgres_data:

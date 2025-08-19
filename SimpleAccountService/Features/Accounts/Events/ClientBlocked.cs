@@ -1,4 +1,5 @@
-﻿using Simple_Account_Service.Application.Abstractions;
+﻿using JetBrains.Annotations;
+using Simple_Account_Service.Application.Abstractions;
 using Simple_Account_Service.Application.Interfaces;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
@@ -10,6 +11,7 @@ namespace Simple_Account_Service.Features.Accounts.Events;
 public record ClientBlocked(Guid ClientId, Guid EventId, DateTime OccurredAt, EventMeta Meta)
     : AntifraudEvent(EventId, OccurredAt, Meta);
 
+[UsedImplicitly]
 public class ClientBlockedHandler(IInboxRepository inboxRepository, IAccountRepository accountRepository,
     IInboxDeadLettersRepository deadRepository, ILogger<ClientBlockedHandler> logger) : IInboxEventHandler<ClientBlocked>
 {
