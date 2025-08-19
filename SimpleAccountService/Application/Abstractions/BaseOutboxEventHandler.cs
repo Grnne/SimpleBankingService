@@ -36,7 +36,6 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
         if (payload == null)
         {
             var errorMsg = $"Payload for event {typeof(TEvent).Name} cannot be null.";
-            logger.LogError(errorMsg);
             throw new InvalidOperationException(errorMsg);
         }
 

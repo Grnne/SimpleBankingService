@@ -34,7 +34,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         .WithImage("rabbitmq:4.1.3-management")
         .WithUsername("guest")
         .WithPassword("guest")
-        
+
         .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5672))
         .Build();
 
@@ -65,6 +65,13 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             config.AddInMemoryCollection(dict);
         });
 
+        builder.ConfigureLogging(logging =>
+        {
+            logging.ClearProviders();
+            logging.AddConsole();
+            logging.SetMinimumLevel(LogLevel.Debug);
+        });
+
         builder.ConfigureServices((context, services) =>
         {
             // Замена конфигурации DbContext на тестовую
@@ -86,6 +93,16 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         });
     }
 
+    public async Task StopRabbitMqAsync()
+    {
+        await _rmqContainer.StopAsync();
+    }
+
+    public async Task StartRabbitMqAsync()
+    {
+        await _rmqContainer.StartAsync();
+        await Task.Delay(10000);
+    }
 
     public new async ValueTask DisposeAsync()
     {

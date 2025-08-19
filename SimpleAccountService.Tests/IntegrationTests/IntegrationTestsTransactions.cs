@@ -9,6 +9,7 @@ using System.Net.Http.Json;
 
 namespace SimpleAccountService.Tests.IntegrationTests;
 
+[Collection("TransactionsCollection")]
 [UsedImplicitly]
 public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFactory>, IDisposable
 {
@@ -16,13 +17,15 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
     private readonly IServiceScope _scope;
     private readonly SasDbContext _context;
 
+    private readonly IntegrationTestWebAppFactory _factory;
+
     public TransactionsControllerTests(IntegrationTestWebAppFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("TestScheme");
         _scope = factory.Services.CreateScope();
         _context = _scope.ServiceProvider.GetRequiredService<SasDbContext>();
-
         CleanDatabase();
     }
 
@@ -114,5 +117,9 @@ public class TransactionsControllerTests : IClassFixture<IntegrationTestWebAppFa
         }
     }
 
+    //[Fact]
+    //public async Task ClientBlockedEvent_ShouldFreezeAccount()
+    //{
 
+    //}
 }

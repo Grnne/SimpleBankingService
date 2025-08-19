@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
