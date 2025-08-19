@@ -3,19 +3,25 @@ using RabbitMQ.Client.Exceptions;
 
 namespace Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
 
-public class RabbitMqSetup(ILogger<RabbitMqSetup> logger) : IAsyncDisposable
+public class RabbitMqSetup(ILogger<RabbitMqSetup> logger, IConfiguration configuration) : IAsyncDisposable
 {
     private IConnection? _connection;
     private IChannel? _channel;
+    private readonly string _hostName = configuration["RabbitMQ:Host"] ?? "localhost";
+    private readonly int _port = int.TryParse(configuration["RabbitMQ:Port"], out var port) ? port : 5672;
+    private readonly string _userName = configuration["RabbitMQ:UserName"] ?? "guest";
+    private readonly string _password = configuration["RabbitMQ:Password"] ?? "guest";
+
 
     public async Task InitializeAsync()
     {
         var factory = new ConnectionFactory
         {
-            // TODO from config
-            HostName = "rabbitmq",
-            UserName = "guest",
-            Password = "guest"
+            HostName = _hostName,
+            Port = _port,
+            UserName = _userName,
+            Password = _password,
+            AutomaticRecoveryEnabled = true
         };
 
         _connection = await factory.CreateConnectionAsync();

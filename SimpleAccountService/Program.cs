@@ -32,7 +32,8 @@ public class Program
             .AddCommonServices()
             .AddAutoMapper(typeof(Program))
             .AddCustomSwagger()
-            .AddCustomHangfire(builder.Configuration);
+            .AddCustomHangfire(builder.Configuration)
+            .AddCustomRabbitMq(builder.Configuration, builder.Environment);
 
         var app = builder.Build();
 

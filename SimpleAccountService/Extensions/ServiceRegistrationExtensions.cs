@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
+using RabbitMQ.Client;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Application.Interfaces;
@@ -16,6 +17,7 @@ using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
 using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Reflection;
+using IConnectionFactory = RabbitMQ.Client.IConnectionFactory;
 
 namespace Simple_Account_Service.Extensions;
 
@@ -51,13 +53,43 @@ public static class ServiceRegistrationExtensions
 
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
-
-        services.AddSingleton<RabbitMqSetup>();
         // For dummy Keycloak token request
         services.AddHttpClient();
 
         return services;
     }
+
+    public static IServiceCollection AddCustomRabbitMq(this IServiceCollection services, IConfiguration configuration, IHostEnvironment? env = null)
+    {
+        if (env != null && env.IsEnvironment("IntegrationTests"))
+            return services; // Пропускаем регистрацию в тестах
+
+        services.AddSingleton<IConnectionFactory>(_ =>
+            new ConnectionFactory
+            {
+                HostName = configuration["RabbitMQ:Host"] ?? "localhost",
+                Port = configuration["RabbitMQ:Port"] != null ? int.Parse(configuration["RabbitMQ:Port"]!) : AmqpTcpEndpoint.UseDefaultPort,
+                UserName = configuration["RabbitMQ:Username"] ?? "guest",
+                Password = configuration["RabbitMQ:Password"] ?? "guest",
+                AutomaticRecoveryEnabled = true
+            });
+
+        services.AddSingleton(sp =>
+        {
+            var factory = sp.GetRequiredService<IConnectionFactory>();
+            return factory.CreateConnectionAsync();
+        });
+
+        services.AddSingleton<RabbitMqSetup>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<RabbitMqSetup>>();
+            var config = sp.GetRequiredService<IConfiguration>();
+            return new RabbitMqSetup(logger, config);
+        });
+
+        return services;
+    }
+
 
     public static IServiceCollection AddCustomMediatr(this IServiceCollection services)
     {
@@ -89,4 +121,6 @@ public static class ServiceRegistrationExtensions
 
         return services;
     }
+
+
 }
