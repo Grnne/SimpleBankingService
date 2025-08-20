@@ -20,7 +20,30 @@
         condition: service_healthy
       keycloak:
         condition: service_healthy
-   
+    networks:
+        main:
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  
+      - "15672:15672"
+    environment:
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__UserName: guest
+      RabbitMQ__Password: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      start_period: 10s
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+        main:
+    
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2
     container_name: keycloak
@@ -47,6 +70,8 @@
         timeout: 3s
         retries: 10
         start_period: 20s
+    networks:
+        main:
 
   sas-db:
     image: postgres:latest
@@ -56,7 +81,7 @@
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - ./.containers/products-db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
@@ -65,3 +90,13 @@
       timeout: 3s
       retries: 10
       start_period: 20s
+    networks:
+        main:
+
+networks:
+  main:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:

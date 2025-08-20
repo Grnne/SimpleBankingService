@@ -3,4 +3,4 @@ using Simple_Account_Service.Application.Models;
 
 namespace Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 
-public record CreateAccountCommand(CreateAccountDto Request) : IRequest<MbResult<AccountDto>>;
+public record CreateAccountCommand(CreateAccountDto Request, Guid CorrelationId) : IRequest<MbResult<AccountDto>>;

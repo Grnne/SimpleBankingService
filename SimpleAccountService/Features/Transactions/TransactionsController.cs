@@ -46,8 +46,10 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateTransaction(Guid accountId, [FromBody] CreateTransactionDto createTransactionDto)
     {
+
+        var correlationId = GetOrCreateCorrelationId();
         var response = await mediator.Send(
-            new CreateTransactionCommand(accountId, createTransactionDto));
+            new CreateTransactionCommand(accountId, createTransactionDto, correlationId));
 
         return StatusCode(StatusCodes.Status201Created, response);
     }
@@ -83,9 +85,21 @@ public class TransactionsController(IMediator mediator) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> TransferBetweenAccounts(Guid accountId, [FromBody] TransferDto transferDto)
     {
+        var correlationId = GetOrCreateCorrelationId();
         var response = await mediator.Send(
-            new TransferBetweenAccountsCommand(accountId, transferDto));
+            new TransferBetweenAccountsCommand(accountId, transferDto, correlationId));
 
         return Ok(response);
     }
+
+    private Guid GetOrCreateCorrelationId()
+    {
+        if (Request.Headers.TryGetValue("X-Correlation-Id", out var cidString)
+            && Guid.TryParse(cidString, out var cid))
+        {
+            return cid;
+        }
+        return Guid.NewGuid();
+    }
 }
+

@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Simple_Account_Service.Features.Accounts.Entities;
@@ -11,14 +10,12 @@ using Simple_Account_Service.Infrastructure.Data;
 
 #nullable disable
 
-namespace Simple_Account_Service.Infrastructure.Migrations
+namespace Simple_Account_Service.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(SasDbContext))]
-    [Migration("20250809050607_AddGistIndexForTransactionTimestamp")]
-    partial class AddGistIndexForTransactionTimestamp
+    partial class SasDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,6 +54,10 @@ namespace Simple_Account_Service.Infrastructure.Migrations
                         .HasMaxLength(3)
                         .HasColumnType("character varying(3)")
                         .HasColumnName("currency");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("boolean")
+                        .HasColumnName("frozen");
 
                     b.Property<decimal?>("InterestRate")
                         .HasColumnType("numeric(5,4)")
@@ -147,6 +148,129 @@ namespace Simple_Account_Service.Infrastructure.Migrations
                         .HasDatabaseName("ix_transactions_account_id_timestamp");
 
                     b.ToTable("transactions", (string)null);
+                });
+
+            modelBuilder.Entity("Simple_Account_Service.Infrastructure.Messaging.Inbox.InboxConsumedMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Handler")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("handler");
+
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("processed_at");
+
+                    b.HasKey("MessageId")
+                        .HasName("pk_inbox_consumed_messages");
+
+                    b.ToTable("inbox_consumed_messages", (string)null);
+                });
+
+            modelBuilder.Entity("Simple_Account_Service.Infrastructure.Messaging.Inbox.InboxDeadLetter", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("message_id");
+
+                    b.Property<Guid?>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<Guid?>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("Error")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("text")
+                        .HasColumnName("error");
+
+                    b.Property<string>("Handler")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("handler");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("received_at");
+
+                    b.HasKey("MessageId")
+                        .HasName("pk_inbox_dead_letters");
+
+                    b.ToTable("inbox_dead_letters", (string)null);
+                });
+
+            modelBuilder.Entity("Simple_Account_Service.Infrastructure.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CausationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("causation_id");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("processed_at");
+
+                    b.Property<bool>("Published")
+                        .HasColumnType("boolean")
+                        .HasColumnName("published");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("source");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_outbox_messages");
+
+                    b.ToTable("outbox_messages", (string)null);
                 });
 
             modelBuilder.Entity("Simple_Account_Service.Features.Transactions.Entities.Transaction", b =>

@@ -1,89 +1,29 @@
-﻿Салют, это резюме по заданию 3 на стажировке, сервис «Банковские счета»
+﻿Салют, это резюме по заданию 4 на стажировке, сервис «Банковские счета»
 
-Замечаний прошлый раз небыло, а хотелось бы побольше критики
+Не успел за выходные доделать задачи: тесты, контролер с документация по событиям, да и самодельный outbox dispatcher и consumer вызывают сомнения, как и логгер.
 
 Сам проект лежит на http://localhost:80 или просто http://localhost , автоматически редиректит на /swagger, keycloak на http://localhost:8080
-hangfire на http://localhost/hangfire БД наружу на http://localhost:5433
+hangfire на http://localhost/hangfire БД наружу на http://localhost:5433, Rabbit manager http://localhost:15672, сам rabbit http://localhost:5672/
+
+В outbox и из него в rabbit события падают при создании счета или при любом переводе, входящие из шины можно создать rabbitmq manager - exchanges - publish
+Routing key или client.blocked или client.unblocked, тело
+
+{
+  "eventId": "d290f1ee-6c54-4b01-90e6-d701748f0851",
+  "occurredAt": "2025-08-19T09:45:00Z",
+  "clientId": "11111111-1111-1111-1111-111111111111",
+  "meta": {
+    "version": "v1",
+    "source": "account-service",
+    "correlationId": "11111111-1111-1111-1111-111111111111",
+    "causationId": "22222222-2222-2222-2222-222222222222"
+  }
+}
 
 Запускается или docker-compose up -d, или F5 в IDE, если выбрать docker-compose, билдится около минуты
 Тесты запускаются dotnet test .\SimpleAccountService.Tests\ либо в контекстном меню
 
 Аутентификация в swagger: пойти на эндпоинт Auth/GetToken, выполнить запрос, получить токен в формате "Bearer {token}", вставить токен в авторизацю сваггера(сверху справа) залогиниться и закрыть окно авторизации. Если неужно reseed базу, надо раскомментить //context.Database.EnsureDeleted(); в программ
 
-Снизу ридми привел результат моего EXPLAIN ANALYZE, запрос и QUERY PLAN
 
-При дебаге 50 параллельных запросов в тесте окно дебаггера разрывало 10 минут, но вроде это нормально. Обычный прогон тестов работает в течении 6-10 секунд
-При параллельных запросах выполняется только 1, остальные бросают 409
 
-Крон джоб можно проверить по адресу http://localhost/hangfire где-то там в интерфейсе
-
-Забор данных для выписки в целом получился тупым, без проекции транзакций, но там в любом случае нужно делать периодические балансы счетов, баланс на начало месяца, может быть, каждый месяц, так что я решил уточнить как лучше потом
-
-Модульные тесты сделал с sqlight и дурацкой перегрузкой version, мне не понравились, хочется просто поднять стенд тестировочный обычным докер композом, а не тестконтейнеры.
-UPD Надо бы переделать все тесты нормально, или хотя бы адекватно
-
-EXPLAIN ANALYZE
-SELECT a.id,
-       a.balance,
-       a.closed_at,
-       a.created_at,
-       a.credit_limit,
-       a.currency,
-       a.interest_rate,
-       a.last_interest_accrual_at,
-       a.owner_id,
-       a.type,
-       t0.id,
-       t0.account_id,
-       t0.amount,
-       t0.counterparty_account_id,
-       t0.currency,
-       t0.description,
-       t0.timestamp,
-       t0.type
-FROM accounts AS a
-LEFT JOIN (
-    SELECT t.id,
-           t.account_id,
-           t.amount,
-           t.counterparty_account_id,
-           t.currency,
-           t.description,
-           t.timestamp,
-           t.type
-    FROM transactions AS t
-    WHERE t.timestamp <= '2026-04-10T00:00:00Z'
-) AS t0 ON a.id = t0.account_id
-WHERE a.owner_id = '11111111-1111-1111-1111-111111111111'
-  AND a.created_at <= '2026-04-10T00:00:00Z'
-ORDER BY a.id;
-
-QUERY PLAN                                                                                                                                                       
-
-Sort  (cost=17.54..17.55 rows=1 width=752) (actual time=0.032..0.033 rows=3 loops=1)                                                                             
-
-  Sort Key: a.id                                                                                                                                                 
-
-  Sort Method: quicksort  Memory: 25kB                                                                                                                           
-
-  ->  Nested Loop Left Join  (cost=4.16..17.53 rows=1 width=752) (actual time=0.023..0.026 rows=3 loops=1)                                                       
-
-        ->  Bitmap Heap Scan on accounts a  (cost=4.02..9.36 rows=1 width=140) (actual time=0.013..0.014 rows=2 loops=1)                                         
-
-              Recheck Cond: (owner_id = '11111111-1111-1111-1111-111111111111'::uuid)                                                                            
-
-              Filter: (created_at <= '2026-04-10 07:00:00+07'::timestamp with time zone)                                                                         
-
-              Heap Blocks: exact=1                                                                                                                               
-
-              ->  Bitmap Index Scan on ix_accounts_owner_id  (cost=0.00..4.01 rows=2 width=0) (actual time=0.007..0.007 rows=2 loops=1)       
-                   
-                    Index Cond: (owner_id = '11111111-1111-1111-1111-111111111111'::uuid)     
-                                                                   
-        ->  Index Scan using ix_transactions_account_id_timestamp on transactions t  (cost=0.14..8.16 rows=1 width=612) (actual time=0.004..0.005 rows=2 loops=2)
-
-              Index Cond: ((account_id = a.id) AND ("timestamp" <= '2026-04-10 07:00:00+07'::timestamp with time zone))               
-                           
-Planning Time: 0.143 ms  
-                                                                                                                                        
-Execution Time: 0.090 ms                                                                                                                                         

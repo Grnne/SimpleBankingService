@@ -32,6 +32,9 @@ public class AccountDto
 
     [UsedImplicitly]
     public DateTime? ClosedAt { get; set; }
+    
+    [UsedImplicitly]
+    public bool Frozen { get; set; }
 
     [UsedImplicitly]
     public List<TransactionDto> Transactions { get; set; } = [];

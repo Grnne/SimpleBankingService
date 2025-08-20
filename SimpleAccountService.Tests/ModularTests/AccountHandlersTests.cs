@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using JetBrains.Annotations;
+using MediatR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using Simple_Account_Service.Features.Accounts.Commands.CreateAccount;
 using Simple_Account_Service.Features.Accounts.Commands.DeleteAccount;
 using Simple_Account_Service.Features.Accounts.Commands.UpdateAccount;
@@ -13,12 +16,14 @@ using Simple_Account_Service.Infrastructure.Repositories;
 namespace SimpleAccountService.Tests.ModularTests;
 
 [UsedImplicitly]
-public class AccountHandlersTests : IDisposable
+public class AccountHandlersTests : IDisposable // TODO rework
 {
     private readonly SqliteConnection _connection;
     private readonly SasDbContext _context;
     private readonly AccountRepository _repository;
     private readonly IMapper _mapper;
+    private readonly Mock<IMediator> _mediator;
+
 
     public AccountHandlersTests()
     {
@@ -41,13 +46,15 @@ public class AccountHandlersTests : IDisposable
             cfg.AddProfile<Simple_Account_Service.Features.Transactions.TransactionsMappingProfile>();
         });
         _mapper = mapperConfig.CreateMapper();
+        _mediator = new Mock<IMediator>();
     }
 
     [Fact]
     [UsedImplicitly]
     public async Task CreateAccountCommandHandler_ShouldCreateAccount()
     {
-        var handler = new CreateAccountCommandHandler(_repository, _mapper);
+        var logger = NullLogger<CreateAccountCommandHandler>.Instance;
+        var handler = new CreateAccountCommandHandler(_context, _repository, _mapper, _mediator.Object, logger);
 
         var createDto = new CreateAccountDto
         {
@@ -56,8 +63,8 @@ public class AccountHandlersTests : IDisposable
             Currency = "USD",
             InterestRate = 1.2m
         };
-
-        var command = new CreateAccountCommand(createDto);
+        var correlationId = Guid.NewGuid();
+        var command = new CreateAccountCommand(createDto, correlationId);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
