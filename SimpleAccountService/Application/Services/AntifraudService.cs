@@ -1,18 +1,18 @@
-﻿using MediatR;
+﻿using System.Text;
+using System.Text.Json;
+using MediatR;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using Simple_Account_Service.Application.Interfaces;
+using Simple_Account_Service.Application.Interfaces.Repositories;
 using Simple_Account_Service.Features.Accounts.Events;
 using Simple_Account_Service.Infrastructure.Messaging.Inbox;
 using Simple_Account_Service.Infrastructure.Messaging.Outbox;
-using System.Text;
-using System.Text.Json;
 
-namespace Simple_Account_Service.Features.Accounts.Consumers;
+namespace Simple_Account_Service.Application.Services;
 
-public class AntifraudConsumer(IServiceScopeFactory scopeFactory, ILogger<AntifraudConsumer> logger,
+public class AntifraudService(IServiceScopeFactory scopeFactory, ILogger<AntifraudService> logger,
     IOptions<RabbitMqOptions> options) : BackgroundService, IAsyncDisposable
 {
     private readonly RabbitMqOptions _options = options.Value;

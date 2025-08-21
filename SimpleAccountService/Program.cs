@@ -1,6 +1,9 @@
 ﻿using Hangfire;
 using Hangfire.Dashboard;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Extensions;
 using Simple_Account_Service.Features.Accounts.Interfaces;
@@ -34,6 +37,11 @@ public class Program
             .AddCustomSwagger()
             .AddCustomHangfire(builder.Configuration)
             .AddCustomRabbitMq(builder.Configuration, builder.Environment);
+
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<SasDbContext>()
+            .AddRabbitMQ(sp => sp.GetRequiredService<IConnection>(),
+                name: "rabbitmq", HealthStatus.Degraded, timeout: TimeSpan.FromSeconds(5));
 
         var app = builder.Build();
 

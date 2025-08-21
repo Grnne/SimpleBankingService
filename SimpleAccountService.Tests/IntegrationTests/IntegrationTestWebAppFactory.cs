@@ -109,6 +109,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         await _rmqContainer.StopAsync();
         await _postgresContainer.StopAsync();
+        await _rmqContainer.DisposeAsync();
+        await _postgresContainer.DisposeAsync();
+
         GC.SuppressFinalize(this);
     }
 }

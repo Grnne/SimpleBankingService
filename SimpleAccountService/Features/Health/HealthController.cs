@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple_Account_Service.Application.Models;
 
 namespace Simple_Account_Service.Features.Health;
@@ -9,7 +10,7 @@ namespace Simple_Account_Service.Features.Health;
 /// </summary>
 [ApiController]
 [Route("api/[controller]/[action]")]
-public class HealthController(IMediator mediator) : ControllerBase
+public class HealthController(HealthCheckService health, IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Проверка живости сервиса (liveness probe).
@@ -18,9 +19,10 @@ public class HealthController(IMediator mediator) : ControllerBase
     /// <returns>HTTP 200 OK без тела.</returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult Live()
+    public async Task<IActionResult> Live()
     {
-        return Ok();
+
+        return Ok(await health.CheckHealthAsync());
     }
 
     /// <summary>

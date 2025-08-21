@@ -1,6 +1,6 @@
 ﻿using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 
-namespace Simple_Account_Service.Application.Interfaces;
+namespace Simple_Account_Service.Application.Interfaces.Repositories;
 
 public interface IOutboxRepository
 {

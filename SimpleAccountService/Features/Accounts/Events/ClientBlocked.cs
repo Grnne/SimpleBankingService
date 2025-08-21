@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Simple_Account_Service.Application.Abstractions;
-using Simple_Account_Service.Application.Interfaces;
+using Simple_Account_Service.Application.Interfaces.Messaging;
+using Simple_Account_Service.Application.Interfaces.Repositories;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Messaging.Inbox;

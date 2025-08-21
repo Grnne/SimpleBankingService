@@ -1,4 +1,4 @@
-﻿using Simple_Account_Service.Application.Interfaces;
+﻿using Simple_Account_Service.Application.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Messaging.Inbox;
 

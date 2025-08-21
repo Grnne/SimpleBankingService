@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Simple_Account_Service.Application.Interfaces;
+using Simple_Account_Service.Application.Interfaces.Repositories;
 using System.Diagnostics;
 using System.Text;
 

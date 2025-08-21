@@ -4,12 +4,9 @@ using Hangfire.PostgreSql;
 using RabbitMQ.Client;
 using Simple_Account_Service.Application.Behaviors;
 using Simple_Account_Service.Application.ForFakesAndDummies;
-using Simple_Account_Service.Application.Interfaces;
-using Simple_Account_Service.Features.Accounts;
-using Simple_Account_Service.Features.Accounts.Consumers;
+using Simple_Account_Service.Application.Interfaces.Repositories;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
-using Simple_Account_Service.Features.Transactions;
 using Simple_Account_Service.Features.Transactions.Interfaces;
 using Simple_Account_Service.Features.Transactions.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Messaging.Outbox;
@@ -18,6 +15,7 @@ using Simple_Account_Service.Infrastructure.Middleware;
 using Simple_Account_Service.Infrastructure.Repositories;
 using System.Reflection;
 using IConnectionFactory = RabbitMQ.Client.IConnectionFactory;
+using Simple_Account_Service.Application.Services;
 
 namespace Simple_Account_Service.Extensions;
 
@@ -34,7 +32,7 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IInboxRepository, InboxRepository>();
         services.AddScoped<IInboxDeadLettersRepository, InboxDeadLettersRepository>();
         services.AddHostedService<OutboxDispatcher>();
-        services.AddHostedService<AntifraudConsumer>();
+        services.AddHostedService<AntifraudService>();
 
         return services;
     }
