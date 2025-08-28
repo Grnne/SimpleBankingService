@@ -75,7 +75,7 @@ public class OutboxTests(IntegrationTestWebAppFactory factory)
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
 
             var notProcessedMessages = await context.OutboxMessages
-                .Where(m => m.ProcessedAt == null)
+                .Where(m => m.PublishedAt == null)
                 .ToListAsync();
           //  Assert.NotEmpty(notProcessedMessages);
         }
@@ -87,12 +87,12 @@ public class OutboxTests(IntegrationTestWebAppFactory factory)
             var context = scope.ServiceProvider.GetRequiredService<SasDbContext>();
 
             var processedMessages = await context.OutboxMessages
-                .Where(m => m.ProcessedAt != null)
+                .Where(m => m.PublishedAt != null)
                 .ToListAsync();
             Assert.NotEmpty(processedMessages);
 
             var notProcessedMessages = await context.OutboxMessages
-                .Where(m => m.ProcessedAt == null)
+                .Where(m => m.PublishedAt == null)
                 .ToListAsync();
             Assert.Empty(notProcessedMessages);
         }

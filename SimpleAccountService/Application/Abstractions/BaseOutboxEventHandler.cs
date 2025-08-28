@@ -31,7 +31,6 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
 
         var stopwatch = Stopwatch.StartNew();
 
-
         var payload = MapPayload(notification);
 
         if (payload == null)
