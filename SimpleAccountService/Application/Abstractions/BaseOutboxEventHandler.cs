@@ -21,7 +21,6 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
     : BaseOutboxEventHandler, INotificationHandler<TEvent>
     where TEvent : IOutboxEvent
 {
-
     protected abstract TPayload MapPayload(TEvent outboxEvent);
 
     public async Task Handle(TEvent notification, CancellationToken cancellationToken)

@@ -9,7 +9,6 @@ public class OutboxProducerService(ILogger<OutboxProducerService> logger, IServi
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Producer Service started");
-
         
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -17,7 +16,6 @@ public class OutboxProducerService(ILogger<OutboxProducerService> logger, IServi
             {
                 try
                 {
-
                     var provider = scope.ServiceProvider;
                     var publisher = provider.GetRequiredService<IRabbitMqPublisher>();
                     var outboxDispatcher = provider.GetRequiredService<IOutboxDispatcher>();

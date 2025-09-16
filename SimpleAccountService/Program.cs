@@ -9,6 +9,8 @@ using Simple_Account_Service.Extensions;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
+using System;
+using System.Xml.Linq;
 
 namespace Simple_Account_Service;
 

@@ -29,15 +29,15 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<ITransactionService, TransactionsService>();
         services.AddScoped<IAccountsService, AccountsService>();
 
-        
-        
         services.AddSingleton<RabbitMqConnectionFactory>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<IInboxRepository, InboxRepository>();
         services.AddScoped<IInboxDeadLettersRepository, InboxDeadLettersRepository>();
         services.AddScoped<IOutboxDispatcher, OutboxDispatcher>();
-        services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>(); 
+        services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
+        services.AddScoped<IRabbitMqConsumer, RabbitMqConsumer>();
         services.AddHostedService<OutboxProducerService>();
+        services.AddHostedService<ConsumerService>();
 
         return services;
     }
