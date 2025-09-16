@@ -1,11 +1,16 @@
 ﻿using Hangfire;
 using Hangfire.Dashboard;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 using Simple_Account_Service.Application.ForFakesAndDummies;
 using Simple_Account_Service.Extensions;
 using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Infrastructure.Data;
 using Simple_Account_Service.Infrastructure.Messaging.RabbitMq;
+using System;
+using System.Xml.Linq;
 
 namespace Simple_Account_Service;
 
@@ -32,10 +37,14 @@ public class Program
             .AddCommonServices()
             .AddAutoMapper(typeof(Program))
             .AddCustomSwagger()
-            .AddCustomHangfire(builder.Configuration)
-            .AddCustomRabbitMq(builder.Configuration, builder.Environment);
+            .AddCustomHangfire(builder.Configuration);
 
-        var app = builder.Build();
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<SasDbContext>()
+            .AddRabbitMQ(sp => sp.GetRequiredService<IConnection>(),
+                name: "rabbitmq", HealthStatus.Degraded, timeout: TimeSpan.FromSeconds(5));
+
+            var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
         {
@@ -53,11 +62,6 @@ public class Program
         app.UseExceptionHandler();
 
         // TODO переделать в асинхронный main возможно
-        using (var scope = app.Services.CreateScope())
-        {
-            var rabbitSetup = scope.ServiceProvider.GetRequiredService<RabbitMqSetup>();
-            rabbitSetup.InitializeAsync().GetAwaiter().GetResult();
-        }
 
         app.UseSwagger();
         app.UseSwaggerUI(c =>

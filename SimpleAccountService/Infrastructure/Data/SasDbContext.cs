@@ -69,12 +69,13 @@ public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(op
         modelBuilder.Entity<OutboxMessage>(entity =>
         {
             entity.Property(o => o.Payload)
-                .HasColumnType("jsonb");
+                .HasColumnType("jsonb")
+                .HasMaxLength(5000); 
             entity.Property(o => o.EventType)
                 .HasMaxLength(200);
-            entity.Property(i => i.ProcessedAt)
+            entity.Property(o => o.PublishedAt)
                 .HasColumnType("timestamptz");
-            entity.Property(i => i.OccurredAt)
+            entity.Property(o => o.OccurredAt)
                 .HasColumnType("timestamptz");
             entity.Property(o => o.Source)
                 .HasMaxLength(200);
@@ -96,12 +97,14 @@ public class SasDbContext(DbContextOptions<SasDbContext> options) : DbContext(op
             entity.HasKey(i => i.MessageId);
             entity.Property(i => i.ReceivedAt)
                 .HasColumnType("timestamptz");
-            entity.Property(x => x.Handler)
+            entity.Property(i => i.Handler)
                 .HasMaxLength(500);
-            entity.Property(x => x.Payload)
-                .HasColumnType("jsonb");
-            entity.Property(x => x.Error)
-                .HasColumnType("text");
+            entity.Property(i => i.Payload)
+                .HasColumnType("jsonb")
+                .HasMaxLength(5000);
+            entity.Property(i => i.Error)
+                .HasColumnType("text")
+                .HasMaxLength(500);
         });
 
         var dateTimeConverter = new DateTimeUtcConverter();

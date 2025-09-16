@@ -5,7 +5,7 @@ using Simple_Account_Service.Features.Accounts.Interfaces;
 using Simple_Account_Service.Features.Accounts.Interfaces.Repositories;
 using Simple_Account_Service.Infrastructure.Data;
 
-namespace Simple_Account_Service.Features.Accounts;
+namespace Simple_Account_Service.Application.Services;
 
 public class AccountsService(IAccountRepository repository, SasDbContext context, ILogger<AccountsService> logger, IMediator mediator) : IAccountsService
 {

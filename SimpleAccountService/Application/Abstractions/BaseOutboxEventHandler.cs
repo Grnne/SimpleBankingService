@@ -1,5 +1,6 @@
 ﻿using MediatR;
-using Simple_Account_Service.Application.Interfaces;
+using Simple_Account_Service.Application.Interfaces.Messaging;
+using Simple_Account_Service.Application.Interfaces.Repositories;
 using Simple_Account_Service.Application.Models;
 using Simple_Account_Service.Infrastructure.Messaging.Outbox;
 using System.Diagnostics;
@@ -20,7 +21,6 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
     : BaseOutboxEventHandler, INotificationHandler<TEvent>
     where TEvent : IOutboxEvent
 {
-
     protected abstract TPayload MapPayload(TEvent outboxEvent);
 
     public async Task Handle(TEvent notification, CancellationToken cancellationToken)
@@ -29,7 +29,6 @@ public abstract class BaseOutboxEventHandler<TEvent, TPayload>(IOutboxRepository
             typeof(TEvent).Name, notification.EventId, notification.CorrelationId);
 
         var stopwatch = Stopwatch.StartNew();
-
 
         var payload = MapPayload(notification);
 

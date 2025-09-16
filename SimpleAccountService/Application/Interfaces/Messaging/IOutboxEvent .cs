@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Simple_Account_Service.Application.Interfaces;
+namespace Simple_Account_Service.Application.Interfaces.Messaging;
 
 public interface IOutboxEvent : INotification
 {

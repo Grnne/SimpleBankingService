@@ -14,12 +14,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
 		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
 		<PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
 		<PackageReference Include="FluentValidation" Version="12.0.0" />
 		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
 		<!-- ReSharper disable once VulnerablePackage -->
 		<PackageReference Include="Hangfire" Version="1.8.20" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.8" />
 		<!-- Поставил ньютонсофт джсон безопасной версии, но предупреждение не исчезло-->
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Hangfire.PostgreSql" Version="1.20.12" />

@@ -4,7 +4,7 @@ using Simple_Account_Service.Features.Transactions.Entities;
 using Simple_Account_Service.Features.Transactions.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Simple_Account_Service.Features.Transactions;
+namespace Simple_Account_Service.Application.Services;
 
 public class TransactionsService : ITransactionService
 {

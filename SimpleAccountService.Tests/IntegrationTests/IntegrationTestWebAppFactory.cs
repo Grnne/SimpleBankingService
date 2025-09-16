@@ -75,18 +75,14 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         builder.ConfigureServices((context, services) =>
         {
-            // Замена конфигурации DbContext на тестовую
             services.RemoveAll<DbContextOptions<SasDbContext>>();
             services.AddDbContext<SasDbContext>(options =>
                 options.UseNpgsql(testConnectionString));
 
-            // Удаление старых регистраций RabbitMQ
             services.RemoveAll<IConnection>();
             services.RemoveAll<IConnectionFactory>();
-            services.RemoveAll<RabbitMqSetup>();
+            services.RemoveAll<RabbitMqConnectionFactory>();
 
-            // Вызов вашего метода расширения для RabbitMQ с конфигурацией и окружением
-            services.AddCustomRabbitMq(context.Configuration, context.HostingEnvironment);
 
             services.AddAuthentication("TestScheme")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
@@ -109,6 +105,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         await _rmqContainer.StopAsync();
         await _postgresContainer.StopAsync();
+        await _rmqContainer.DisposeAsync();
+        await _postgresContainer.DisposeAsync();
+
         GC.SuppressFinalize(this);
     }
 }

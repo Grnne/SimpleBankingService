@@ -1,4 +1,4 @@
-﻿namespace Simple_Account_Service.Application.Interfaces;
+﻿namespace Simple_Account_Service.Application.Interfaces.Repositories;
 
 public interface IInboxRepository
 {
