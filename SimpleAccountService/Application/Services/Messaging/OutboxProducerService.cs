@@ -4,7 +4,7 @@ namespace Simple_Account_Service.Application.Services.Messaging;
 
 public class OutboxProducerService(ILogger<OutboxProducerService> logger, IServiceScopeFactory factory) : BackgroundService
 {
-    private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(5);
+    private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(15);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

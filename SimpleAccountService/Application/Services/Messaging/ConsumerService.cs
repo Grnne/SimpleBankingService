@@ -11,7 +11,7 @@ public class ConsumerService(
     ILogger<ConsumerService> logger)
     : BackgroundService
 {
-    private readonly TimeSpan _consumptionPeriod = TimeSpan.FromSeconds(15);
+    private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(15);
 
     private readonly Dictionary<string, Type> _routingKeyToTypeMap = new()
     {
@@ -25,7 +25,7 @@ public class ConsumerService(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            using var scope = scopeFactory.CreateScope();
+            await using var scope = scopeFactory.CreateAsyncScope();
             var consumer = scope.ServiceProvider.GetRequiredService<IRabbitMqConsumer>();
 
             try
@@ -36,8 +36,8 @@ public class ConsumerService(
                         await ProcessMessageAsync(body, routingKey, headers, scope.ServiceProvider, stoppingToken),
                     stoppingToken);
 
-                logger.LogInformation("Consumer started successfully. Waiting for {Period}...", _consumptionPeriod);
-                await Task.Delay(_consumptionPeriod, stoppingToken);
+                logger.LogInformation("Consumer started successfully. Waiting for {Period}...", _pollingInterval);
+                await Task.Delay(_pollingInterval, stoppingToken);
             }
             catch (OperationCanceledException)
             {
@@ -46,8 +46,8 @@ public class ConsumerService(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error in consumption cycle. Retrying in {Period}...", _consumptionPeriod);
-                await Task.Delay(_consumptionPeriod, stoppingToken);
+                logger.LogError(ex, "Error in consumption cycle. Retrying in {Period}...", _pollingInterval);
+                await Task.Delay(_pollingInterval, stoppingToken);
             }
             finally
             {
