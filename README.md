@@ -1,19 +1,11 @@
 ﻿ Init structure for Base Project Template. Pragmatic Clean Architecture + Vertical Slices, dummy for microservice, maybe redo for monolith
  
- TODO Configuration, Extensions, env, polish docker-compose
+ TODO 
  
  Docker
  
- Vue+Vite -- TODO basic front with chatgpt
+ Vue+Vite -- maybe TODO basic front with ai
+  
+ Dummy RabbitMq + transaction outbox for messaging refactor and simplify
  
- Swagger for docs
- 
- MediatR CQRS Fluent Validation
- 
- KeyCloak, Auth -- TODO
- 
- Postgres
- 
- RabbitMq + transaction outbox for messaging(useless for now) -- TODO
- 
- Testing with testcontainers -- TODO adequate fixture, abuse chatgpt to make unit tests, make critical way tests, make sone integrational tests
+ Testing with testcontainers -- TODO adequate fixture, abuse chatgpt to make unit tests, make critical way tests, make some integrational tests
