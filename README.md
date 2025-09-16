@@ -1,4 +1,7 @@
-﻿Init structure for Base Project Template. Pragmatic Clean Architecture + Vertical Slices, dummy for microservice, maybe redo for monolith
+Учебный проект микросервиса для работы с банковскими счетами
+
+Архитектура: Practical Clean Architecture + Vertical Slices, заготовка под микросервис.
+
  
  Сам проект лежит на http://localhost:80 или просто http://localhost , автоматически редиректит на /swagger, keycloak на http://localhost:8080 hangfire на http://localhost/hangfire БД наружу на http://localhost:5433, Rabbit manager http://localhost:15672, сам rabbit http://localhost:5672/
  
@@ -8,6 +11,7 @@
  
 
  TODO 
+ Make from this init structure for Base Project Template. Pragmatic Clean Architecture + Vertical Slices, dummy for microservice, maybe redo for monolith
  
  Vue+Vite -- maybe TODO basic front with ai
   
